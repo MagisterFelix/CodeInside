@@ -11,8 +11,8 @@ For help to get started with Django, see the online [documentation](https://docs
 ### Installation
 
 1. Clone/download this repository `git clone https://github.com/mgtippet33/CodeInside.git`
-2. Install requirements `pip install -r requirements.txt`
-3. Open folder `cd CodeInside`
+2. Open folder `cd CodeInside`
+3. Install requirements `pip install -r requirements.txt`
 4. Run server to make sure everything is fine `python manage.py runserver`
 
 ## Contributions
