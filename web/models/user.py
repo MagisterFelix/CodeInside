@@ -1,11 +1,12 @@
 from django.db import models
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser, PermissionsMixin
+
 from .achievement import Achievement
 
 
 class UserManager(BaseUserManager):
 
-    def create_user(self, email, password=None, name=None):
+    def create_user(self, email, password, birthday, name=None):
         if not email:
             raise ValueError('Users must have an email address')
 
@@ -14,10 +15,12 @@ class UserManager(BaseUserManager):
 
         user = self.model(
             email=self.normalize_email(email),
-            name=name
+            name=name,
+            birthday=birthday
         )
         user.set_password(password)
         user.save(using=self._db)
+
         return user
 
     def create_superuser(self, email, password):
@@ -45,7 +48,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     name = models.CharField(max_length=50, blank=True)
     premium = models.BooleanField(default=False)
     birthday = models.DateField(blank=True, null=True)
-    achievement = models.ManyToManyField(Achievement)
+    achievement = models.ManyToManyField(Achievement, blank=True)
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []

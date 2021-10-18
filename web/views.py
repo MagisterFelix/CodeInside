@@ -1,3 +1,113 @@
-from django.shortcuts import render
+from datetime import date
 
-# Create your views here.
+from rest_framework import status
+from rest_framework.generics import CreateAPIView, RetrieveAPIView
+from rest_framework.response import Response
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework_jwt.authentication import JSONWebTokenAuthentication
+
+from .serializers import UserRegistrationSerializer, UserLoginSerializer
+from .models import User
+
+
+class UserRegistrationView(CreateAPIView):
+
+    serializer_class = UserRegistrationSerializer
+    permission_classes = (AllowAny,)
+
+    def post(self, request):
+        month, day, year = map(int, request.data['birthday'].split('/'))
+        request.data['birthday'] = date(year, month, day)
+
+        serializer = self.serializer_class(data=request.data)
+
+        if serializer.is_valid():
+            serializer.save()
+            success = True
+            status_code = status.HTTP_201_CREATED
+            message = 'User registered successfully'
+        else:
+            success = False
+            message = ''
+            for value in serializer.errors.values():
+                message += value[0][:-1].capitalize() + ';'
+            status_code = status.HTTP_400_BAD_REQUEST
+
+        response = {
+            'success': success,
+            'status code': status_code,
+            'message': message,
+        }
+
+        return Response(response, status=status_code)
+
+
+class UserLoginView(RetrieveAPIView):
+
+    serializer_class = UserLoginSerializer
+    permission_classes = (AllowAny,)
+
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+
+        if serializer.is_valid():
+            success = True
+            status_code = status.HTTP_200_OK
+            message = 'User logged in successfully'
+            token = serializer.data['token']
+        else:
+            success = False
+            message = ''
+            for value in serializer.errors.values():
+                message += value[0][:-1].capitalize() + ';'
+            status_code = status.HTTP_400_BAD_REQUEST
+            token = None
+
+        response = {
+            'success': success,
+            'status code': status_code,
+            'message': message,
+            'token': token
+        }
+
+        return Response(response, status=status_code)
+
+
+class UserProfileView(RetrieveAPIView):
+
+    permission_classes = (IsAuthenticated,)
+    authentication_class = JSONWebTokenAuthentication
+
+    def get(self, request):
+
+        if User.objects.filter(email=request.user).exists():
+            user_profile = User.objects.get(email=request.user)
+            role = 'Admin' if user_profile.is_superuser else 'Moderator' if user_profile.is_staff else 'User'
+            banned = not user_profile.is_active
+            birthday = user_profile.birthday.strftime(
+                '%m/%d/%Y') if user_profile.birthday else None
+
+            success = True
+            status_code = status.HTTP_200_OK
+            message = 'User profile received successfully'
+            data = {
+                'name': user_profile.name,
+                'role': role,
+                'banned': banned,
+                'premium': user_profile.premium,
+                'birthday': birthday,
+            }
+        else:
+            success = False
+            status_code = status.HTTP_400_BAD_REQUEST
+            message = 'User does not exist'
+            data = None
+
+        response = {
+            'success': success,
+            'status code': status_code,
+            'message': message,
+            'data': data
+        }
+
+        return Response(response, status=status_code)
