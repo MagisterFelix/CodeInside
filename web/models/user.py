@@ -6,7 +6,7 @@ from .achievement import Achievement
 
 class UserManager(BaseUserManager):
 
-    def create_user(self, email, password, birthday, name=None):
+    def create_user(self, email, password, name=None, birthday=None):
         if not email:
             raise ValueError('Users must have an email address')
 
@@ -38,14 +38,14 @@ class UserManager(BaseUserManager):
 class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(
         verbose_name='email',
-        max_length=255,
+        max_length=40,
         unique=True
     )
     is_active = models.BooleanField(default=True, verbose_name='Active')
     is_staff = models.BooleanField(default=False, verbose_name='Moderator')
     is_superuser = models.BooleanField(default=False, verbose_name='Admin')
 
-    name = models.CharField(max_length=50, blank=True)
+    name = models.CharField(max_length=40, blank=True)
     premium = models.BooleanField(default=False)
     birthday = models.DateField(blank=True, null=True)
     achievement = models.ManyToManyField(Achievement, blank=True)
