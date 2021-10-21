@@ -31,6 +31,15 @@ class UserLoginSerializer(serializers.Serializer):
 
         email = data.get("email", None)
         password = data.get("password", None)
+
+        if not User.objects.filter(email=email).exists():
+            raise serializers.ValidationError(
+                'User does not exist.')
+
+        if not User.objects.filter(email=email).first().is_active:
+            raise serializers.ValidationError(
+                'User has been blocked.')
+
         user = authenticate(email=email, password=password)
 
         if user is None:

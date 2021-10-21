@@ -80,6 +80,8 @@ class UserLoginView(RetrieveAPIView):
                 for value in serializer.errors.values():
                     message += value[0][:-1].capitalize() + '.'
                 status_code = status.HTTP_404_NOT_FOUND
+                if message == 'User has been blocked.':
+                    status_code = status.HTTP_403_FORBIDDEN
                 token = None
 
         response = {

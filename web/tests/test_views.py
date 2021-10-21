@@ -56,7 +56,7 @@ class AuthViewTest(TestCase):
         response = UserLoginView.as_view()(request)
         self.assertDictEqual(response.data,
                              {'success': False, 'status code': 404,
-                              'message': 'No user with this email and password was found.',
+                              'message': 'User does not exist.',
                               'token': None})
 
     def test_login_with_token(self):
