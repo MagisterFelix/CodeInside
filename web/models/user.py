@@ -7,8 +7,8 @@ from .achievement import Achievement
 class UserManager(BaseUserManager):
 
     def create_user(self, email, password, name=None, birthday=None):
-        if not email:
-            raise ValueError('Users must have an email address')
+        if email is None:
+            raise ValueError('Users must have an email.')
 
         if name is None:
             name = email[:email.find('@')]
@@ -25,7 +25,7 @@ class UserManager(BaseUserManager):
 
     def create_superuser(self, email, password):
         if password is None:
-            raise TypeError('Superusers must have a password')
+            raise TypeError('Superusers must have a password.')
 
         user = self.create_user(email, password)
         user.is_superuser = True

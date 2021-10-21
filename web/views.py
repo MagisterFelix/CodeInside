@@ -1,5 +1,3 @@
-from datetime import date
-
 from rest_framework import status
 from rest_framework.generics import CreateAPIView, RetrieveAPIView
 from rest_framework.response import Response
@@ -16,22 +14,32 @@ class UserRegistrationView(CreateAPIView):
     permission_classes = (AllowAny,)
 
     def post(self, request):
-        month, day, year = map(int, request.data['birthday'].split('/'))
-        request.data['birthday'] = date(year, month, day)
-
-        serializer = self.serializer_class(data=request.data)
-
-        if serializer.is_valid():
-            serializer.save()
-            success = True
-            status_code = status.HTTP_201_CREATED
-            message = 'User registered successfully'
-        else:
+        if request.data.get('email') is None:
             success = False
-            message = ''
-            for value in serializer.errors.values():
-                message += value[0][:-1].capitalize() + ';'
             status_code = status.HTTP_400_BAD_REQUEST
+            message = 'User must have an email.'
+        elif request.data.get('password') is None:
+            success = False
+            status_code = status.HTTP_400_BAD_REQUEST
+            message = 'User must have a password.'
+        else:
+            if request.data.get('birthday') is not None:
+                month, day, year = request.data['birthday'].split('/')
+                request.data['birthday'] = f'{year}-{month}-{day}'
+
+            serializer = self.serializer_class(data=request.data)
+
+            if serializer.is_valid():
+                serializer.save()
+                success = True
+                status_code = status.HTTP_201_CREATED
+                message = 'User registered successfully.'
+            else:
+                success = False
+                message = ''
+                for value in serializer.errors.values():
+                    message += value[0][:-1].capitalize() + '.'
+                status_code = status.HTTP_400_BAD_REQUEST
 
         response = {
             'success': success,
@@ -48,20 +56,31 @@ class UserLoginView(RetrieveAPIView):
     permission_classes = (AllowAny,)
 
     def post(self, request):
-        serializer = self.serializer_class(data=request.data)
-
-        if serializer.is_valid():
-            success = True
-            status_code = status.HTTP_200_OK
-            message = 'User logged in successfully'
-            token = serializer.data['token']
-        else:
+        if request.data.get('email') is None:
             success = False
-            message = ''
-            for value in serializer.errors.values():
-                message += value[0][:-1].capitalize() + ';'
             status_code = status.HTTP_400_BAD_REQUEST
+            message = 'User must have an email.'
             token = None
+        elif request.data.get('password') is None:
+            success = False
+            status_code = status.HTTP_400_BAD_REQUEST
+            message = 'User must have a password.'
+            token = None
+        else:
+            serializer = self.serializer_class(data=request.data)
+
+            if serializer.is_valid():
+                success = True
+                status_code = status.HTTP_200_OK
+                message = 'User logged in successfully.'
+                token = serializer.data['token']
+            else:
+                success = False
+                message = ''
+                for value in serializer.errors.values():
+                    message += value[0][:-1].capitalize() + '.'
+                status_code = status.HTTP_404_NOT_FOUND
+                token = None
 
         response = {
             'success': success,
@@ -79,29 +98,22 @@ class UserProfileView(RetrieveAPIView):
     authentication_class = JSONWebTokenAuthentication
 
     def get(self, request):
+        user = User.objects.get(email=request.user)
+        role = 'Admin' if user.is_superuser else 'Moderator' if user.is_staff else 'User'
+        banned = not user.is_active
+        birthday = user.birthday.strftime(
+            r'%m/%d/%Y') if user.birthday else None
 
-        if User.objects.filter(email=request.user).exists():
-            user_profile = User.objects.get(email=request.user)
-            role = 'Admin' if user_profile.is_superuser else 'Moderator' if user_profile.is_staff else 'User'
-            banned = not user_profile.is_active
-            birthday = user_profile.birthday.strftime(
-                '%m/%d/%Y') if user_profile.birthday else None
-
-            success = True
-            status_code = status.HTTP_200_OK
-            message = 'User profile received successfully'
-            data = {
-                'name': user_profile.name,
-                'role': role,
-                'banned': banned,
-                'premium': user_profile.premium,
-                'birthday': birthday,
-            }
-        else:
-            success = False
-            status_code = status.HTTP_400_BAD_REQUEST
-            message = 'User does not exist'
-            data = None
+        success = True
+        status_code = status.HTTP_200_OK
+        message = 'User profile received successfully.'
+        data = {
+            'name': user.name,
+            'role': role,
+            'banned': banned,
+            'premium': user.premium,
+            'birthday': birthday,
+        }
 
         response = {
             'success': success,

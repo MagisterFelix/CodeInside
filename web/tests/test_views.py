@@ -12,7 +12,8 @@ class AuthViewTest(TestCase):
     def setUpTestData(cls):
         strong_password = "53175bcc0524f37b47062faf5da28e3f8eb91d51"
         user_mail = "default@gmail.com"
-        User.objects.create_user(email=user_mail, password=strong_password, name="User", birthday="2000-12-13")
+        User.objects.create_user(
+            email=user_mail, password=strong_password, name="User", birthday="2000-12-13")
 
     def setUp(self):
         self.factory = APIRequestFactory()
@@ -25,7 +26,7 @@ class AuthViewTest(TestCase):
                                                               'birthday': '10/10/2000'}, format='json')
         response = UserRegistrationView.as_view()(request)
         self.assertDictEqual(response.data,
-                             {'success': True, 'status code': 201, 'message': 'User registered successfully'})
+                             {'success': True, 'status code': 201, 'message': 'User registered successfully.'})
 
     def test_registration_if_user_already_exists(self):
         request = self.factory.post(path='/api/signUp',
@@ -36,7 +37,7 @@ class AuthViewTest(TestCase):
 
         response = UserRegistrationView.as_view()(request)
         self.assertDictEqual(response.data,
-                             {'success': False, 'status code': 400, 'message': 'User with this email already exists;'})
+                             {'success': False, 'status code': 400, 'message': 'User with this email already exists.'})
 
     def test_login(self):
         request = self.factory.post(path='/api/signIn',
@@ -45,7 +46,7 @@ class AuthViewTest(TestCase):
 
         response = UserLoginView.as_view()(request)
         self.assertListEqual([response.data['success'], response.data['status code'], response.data['message']],
-                             [True, 200, 'User logged in successfully'])
+                             [True, 200, 'User logged in successfully.'])
         self.assertEquals(len(response.data['token']), 200)
 
     def test_login_if_user_not_exists(self):
@@ -54,8 +55,8 @@ class AuthViewTest(TestCase):
                                           'password': self.strong_password, }, format='json')
         response = UserLoginView.as_view()(request)
         self.assertDictEqual(response.data,
-                             {'success': False, 'status code': 400,
-                              'message': 'A user with this email and password is not found;',
+                             {'success': False, 'status code': 404,
+                              'message': 'No user with this email and password was found.',
                               'token': None})
 
     def test_login_with_token(self):
@@ -72,7 +73,7 @@ class AuthViewTest(TestCase):
 
         token_response = UserProfileView.as_view()(token_request)
         self.assertDictEqual(token_response.data,
-                             {'success': True, 'status code': 200, 'message': 'User profile received successfully',
+                             {'success': True, 'status code': 200, 'message': 'User profile received successfully.',
                               'data': {'name': 'User', 'role': 'User', 'banned': False, 'premium': False,
                                        'birthday': '12/13/2000'}})
 
