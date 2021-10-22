@@ -24,6 +24,7 @@ class UserAdmin(UserAdmin):
     add_form = UserCreationForm
     list_display = ('email', 'name',)
     ordering = ('email',)
+    search_fields = ('email',)
     fieldsets = (
         (None, {
             'fields': (
@@ -49,19 +50,21 @@ class AchievementAdmin(admin.ModelAdmin):
 @admin.register(Comment)
 class CommentAdmin(admin.ModelAdmin):
     list_display = ('user', 'task', 'message', 'datetime',)
-    ordering = ('user',)
+    ordering = ('-datetime',)
     search_fields = ('message',)
 
 
 @admin.register(Submission)
 class SubmissionAdmin(admin.ModelAdmin):
-    list_display = ('task', 'user', 'status', 'datetime', 'language', 'time', 'memory',)
-    ordering = ('datetime',)
+    list_display = ('task', 'user', 'status', 'datetime',
+                    'language', 'time', 'memory',)
+    ordering = ('-datetime',)
 
 
 @admin.register(Task)
 class TaskAdmin(admin.ModelAdmin):
-    list_display = ('name', 'desc', 'complexity', 'topic', 'input', 'output', 'solution',)
+    list_display = ('name', 'desc', 'complexity', 'topic',
+                    'input', 'output', 'solution',)
     ordering = ('topic', 'name',)
     search_fields = ('name',)
 

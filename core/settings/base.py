@@ -109,13 +109,18 @@ JWT_AUTH = {
     'JWT_AUTH_COOKIE': None,
 }
 
+DATE_FORMAT = (('m/d/Y'))
+DATE_INPUT_FORMATS = (('%m/%d/%Y'),)
+DATETIME_FORMAT = (('m/d/Y H:i'))
+DATETIME_INPUT_FORMATS = (('%m/%d/%Y %H:%i'),)
+
 LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'UTC'
 
 USE_I18N = True
 
-USE_L10N = True
+USE_L10N = False
 
 USE_TZ = True
 
