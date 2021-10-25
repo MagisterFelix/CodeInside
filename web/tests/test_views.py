@@ -2,8 +2,9 @@ from django.test import TestCase
 from rest_framework.exceptions import ErrorDetail
 from rest_framework.test import APIRequestFactory
 
+from web.tests import future
 from web.views import UserRegistrationView, UserLoginView, UserProfileView
-from web.models import User
+from web.models import User, Topic
 
 
 class AuthViewTest(TestCase):
@@ -120,3 +121,72 @@ class AuthViewTest(TestCase):
         token_response = UserProfileView.as_view()(token_request)
         self.assertDictEqual(token_response.data,
                              {'detail': ErrorDetail(string='User account is disabled.', code='authentication_failed')})
+
+
+@future
+class TopicViewTest(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        Topic.objects.create(name=f"Static_Topic", desc=f"Static_Description")
+
+    def setUp(self):
+        self.factory = APIRequestFactory()
+        Topic.objects.create(name=f"Dynamic_Topic", desc=f"Dynamic_Description")
+
+    def test_topic_create(self):
+        topics_before = Topic.objects.count()
+        request = self.factory.post(path='', data={'name': 'New_Topic',
+                                                   'desc': 'New_Description', }, format='json')
+        response = TopicCreateView.as_view()(request)
+        self.assertDictEqual(response.data,
+                             {'success': True, 'status code': 201, 'message': 'Topic created successfully.'})
+        topics_after = Topic.objects.count()
+        self.assertLess(topics_before, topics_after)
+
+    def test_topic_create_if_exists(self):
+        topics_before = Topic.objects.count()
+        request = self.factory.post(path='', data={'name': 'Static_Topic',
+                                                   'desc': 'Static_Description', }, format='json')
+        response = TopicCreateView.as_view()(request)
+        self.assertDictEqual(response.data,
+                             {'success': False, 'status code': 400, 'message': 'Topic with this name already exists.'})
+        topics_after = Topic.objects.count()
+        self.assertEquals(topics_before, topics_after)
+
+    def test_topic_delete(self):
+        topics_before = Topic.objects.count()
+        request = self.factory.post(path='', data={'id': 2, }, format='json')
+        response = TopicDeleteView.as_view()(request)
+        self.assertDictEqual(response.data,
+                             {'success': True, 'status code': 200, 'message': 'Topic deleted successfully.'})
+        topics_after = Topic.objects.count()
+        self.assertGreater(topics_before, topics_after)
+
+    def test_topic_delete_if_not_exists(self):
+        topics_before = Topic.objects.count()
+        request = self.factory.post(path='', data={'id': 1000, }, format='json')
+        response = TopicDeleteView.as_view()(request)
+        self.assertDictEqual(response.data,
+                             {'success': False, 'status code': 404, 'message': 'Topic does not exists.'})
+        topics_after = Topic.objects.count()
+        self.assertEquals(topics_before, topics_after)
+
+    def test_topic_update(self):
+        request = self.factory.post(path='',
+                                    data={'id': 2, 'name': 'New_Dynamic_Topic', 'desc': 'New_Dynamic_Desc'},
+                                    format='json')
+        response = TopicUpdateView.as_view()(request)
+        self.assertDictEqual(response.data,
+                             {'success': True, 'status code': 200, 'message': 'Topic updated successfully.'})
+
+        t = Topic.objects.get(id=2)
+        self.assertListEqual([t.name, t.desc], ['New_Dynamic_Topic', 'New_Dynamic_Desc'])
+
+    def test_topic_update_if_not_exists(self):
+        request = self.factory.post(path='',
+                                    data={'id': 1000, 'name': 'New_Dynamic_Topic', 'desc': 'New_Dynamic_Desc'},
+                                    format='json')
+        response = TopicUpdateView.as_view()(request)
+        self.assertDictEqual(response.data,
+                             {'success': False, 'status code': 404, 'message': 'Topic does not exists.'})
