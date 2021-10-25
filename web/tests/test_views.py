@@ -86,3 +86,37 @@ class AuthViewTest(TestCase):
         response = UserProfileView.as_view()(request)
         self.assertDictEqual(response.data,
                              {'detail': ErrorDetail(string='Error decoding signature.', code='authentication_failed')})
+
+    def test_login_if_user_banned(self):
+        u = User.objects.get(id=1)
+        u.is_active = False
+        u.save()
+
+        request = self.factory.post(path='/api/signIn',
+                                    data={'email': 'default@gmail.com',
+                                          'password': self.strong_password, }, format='json')
+
+        response = UserLoginView.as_view()(request)
+        self.assertListEqual([response.data['success'], response.data['status code'], response.data['message']],
+                             [False, 403, 'User has been blocked.'])
+        self.assertEquals(response.data['token'], None)
+
+    def test_login_with_token_if_user_banned(self):
+        email = 'default@gmail.com'
+        request = self.factory.post(path='/api/signIn',
+                                    data={'email': email,
+                                          'password': self.strong_password, }, format='json')
+
+        response = UserLoginView.as_view()(request)
+        token = response.data['token']
+
+        u = User.objects.get(id=1)
+        u.is_active = False
+        u.save()
+
+        token_request = self.factory.get(path='/api/profile',
+                                         format='json',
+                                         HTTP_AUTHORIZATION=f'Bearer {token}', )
+        token_response = UserProfileView.as_view()(token_request)
+        self.assertDictEqual(token_response.data,
+                             {'detail': ErrorDetail(string='User account is disabled.', code='authentication_failed')})
