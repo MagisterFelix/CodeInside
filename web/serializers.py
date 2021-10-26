@@ -1,10 +1,13 @@
+from enum import unique
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import update_last_login
 
-from rest_framework import serializers
+from rest_framework import fields, serializers
 from rest_framework_jwt.settings import api_settings
 
-from .models import User
+from web.models.topic import Topic
+
+from .models import User, Task
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
@@ -55,3 +58,15 @@ class UserLoginSerializer(serializers.Serializer):
         }
 
         return response
+
+
+class TaskSerializer(serializers.ModelSerializer):
+
+    topic = serializers.PrimaryKeyRelatedField(
+        queryset=Topic.objects.all(), required=False)
+
+    class Meta:
+        model = Task
+        fields = (
+            'id', 'name', 'desc', 'complexity', 'topic', 'input', 'output', 'solution'
+        )

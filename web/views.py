@@ -1,11 +1,13 @@
 from rest_framework import status
+from rest_framework.views import APIView
 from rest_framework.generics import CreateAPIView, RetrieveAPIView
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
+from rest_framework.decorators import permission_classes
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 
-from .serializers import UserRegistrationSerializer, UserLoginSerializer
-from .models import User
+from .serializers import UserRegistrationSerializer, UserLoginSerializer, TaskSerializer
+from .models import User, Task, Topic
 
 
 class UserRegistrationView(CreateAPIView):
@@ -122,6 +124,150 @@ class UserProfileView(RetrieveAPIView):
             'status code': status_code,
             'message': message,
             'data': data
+        }
+
+        return Response(response, status=status_code)
+
+
+class TaskView(APIView):
+
+    serializer_class = TaskSerializer
+    http_method_names = ['post', 'get', 'put', 'delete', 'options']
+
+    @permission_classes((IsAdminUser,))
+    def post(self, request):
+        if request.data.get('name') is None:
+            success = False
+            status_code = status.HTTP_400_BAD_REQUEST
+            message = 'Task must have a name.'
+        else:
+            topic_name = request.data.get('topic')
+            if Topic.objects.filter(name=topic_name).exists():
+                request.data['topic'] = Topic.objects.get(
+                    name=topic_name).pk
+
+                serializer = self.serializer_class(data=request.data)
+
+                if serializer.is_valid():
+                    serializer.save()
+                    success = True
+                    status_code = status.HTTP_200_OK
+                    message = 'Task created successfully.'
+                else:
+                    success = False
+                    message = ''
+                    for value in serializer.errors.values():
+                        message += value[0][:-1].capitalize() + '.'
+                    status_code = status.HTTP_400_BAD_REQUEST
+            else:
+                success = False
+                message = 'Topic does not exist.'
+                status_code = status.HTTP_404_NOT_FOUND
+
+        response = {
+            'success': success,
+            'status code': status_code,
+            'message': message
+        }
+
+        return Response(response, status=status_code)
+
+    @permission_classes((AllowAny,))
+    def get(self, request):
+        if request.data.get('name') is None:
+            data = Task.objects.all().values("id", "name", "desc",
+                                             "complexity", "topic__name", "input", "output", "solution")
+            success = True
+            status_code = status.HTTP_200_OK
+            message = 'Tasks received successfully.'
+        else:
+            task_name = request.data['name']
+            if Task.objects.filter(name=task_name).exists():
+                data = Task.objects.filter(name=task_name).values("id", "name", "desc",
+                                                                  "complexity", "topic__name", "input", "output", "solution").first()
+                success = True
+                status_code = status.HTTP_200_OK
+                message = 'Task received successfully.'
+            else:
+                data = None
+                success = False
+                status_code = status.HTTP_404_NOT_FOUND
+                message = 'Task does not exist.'
+
+        response = {
+            'success': success,
+            'status code': status_code,
+            'message': message,
+            'data': data
+        }
+
+        return Response(response, status=status_code)
+
+    @permission_classes((IsAdminUser,))
+    def put(self, request):
+        if request.data.get('id') is None:
+            success = False
+            status_code = status.HTTP_400_BAD_REQUEST
+            message = 'Task id is required.'
+        else:
+            topic = request.data.get('topic')
+            if topic:
+                topic = Topic.objects.filter(name=topic)
+                if topic.exists():
+                    request.data['topic'] = topic.first().pk
+                else:
+                    status_code = status.HTTP_404_NOT_FOUND
+                    return Response({
+                        'success': False,
+                        'status code': status_code,
+                        'message': 'Topic does not exist.'
+                    }, status=status_code)
+
+            serializer = self.serializer_class(Task.objects.get(
+                id=request.data['id']), data=request.data)
+
+            if serializer.is_valid():
+                serializer.save()
+                success = True
+                status_code = status.HTTP_200_OK
+                message = 'Task updated successfully.'
+            else:
+                success = False
+                message = ''
+                for value in serializer.errors.values():
+                    message += value[0][:-1].capitalize() + '.'
+                status_code = status.HTTP_400_BAD_REQUEST
+
+        response = {
+            'success': success,
+            'status code': status_code,
+            'message': message
+        }
+
+        return Response(response, status=status_code)
+
+    @permission_classes((IsAdminUser,))
+    def delete(self, request):
+        if request.data.get('name') is None:
+            success = False
+            status_code = status.HTTP_400_BAD_REQUEST
+            message = 'Task name is required.'
+        else:
+            task = Task.objects.filter(name=request.data['name'])
+            if task.exists():
+                Task.objects.filter(name=request.data['name']).delete()
+                success = True
+                status_code = status.HTTP_200_OK
+                message = 'Task deleted successfully.'
+            else:
+                success = False
+                status_code = status.HTTP_404_NOT_FOUND
+                message = 'Task does not exist.'
+
+        response = {
+            'success': success,
+            'status code': status_code,
+            'message': message
         }
 
         return Response(response, status=status_code)
