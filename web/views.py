@@ -3,10 +3,10 @@ from rest_framework.views import APIView
 from rest_framework.generics import CreateAPIView, RetrieveAPIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
-from rest_framework.decorators import permission_classes
+from rest_framework.decorators import permission_classes, authentication_classes
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 
-from .serializers import UserRegistrationSerializer, UserLoginSerializer, TaskSerializer
+from .serializers import UserRegistrationSerializer, UserLoginSerializer, TaskSerializer, TopicSerializer
 from .models import User, Task, Topic
 
 
@@ -151,7 +151,7 @@ class TaskView(APIView):
                 if serializer.is_valid():
                     serializer.save()
                     success = True
-                    status_code = status.HTTP_200_OK
+                    status_code = status.HTTP_201_CREATED
                     message = 'Task created successfully.'
                 else:
                     success = False
@@ -268,6 +268,126 @@ class TaskView(APIView):
             'success': success,
             'status code': status_code,
             'message': message
+        }
+
+        return Response(response, status=status_code)
+
+
+class TopicView(APIView):
+
+    serializer_class = TopicSerializer
+    http_method_names = ['post', 'get', 'put', 'delete', 'options']
+
+    @permission_classes((IsAdminUser,))
+    def post(self, request):
+        if request.data.get('name') is None:
+            success = False
+            status_code = status.HTTP_400_BAD_REQUEST
+            message = 'Topic must have a name.'
+        else:
+            serializer = self.serializer_class(data=request.data)
+
+            if serializer.is_valid():
+                serializer.save()
+                success = True
+                status_code = status.HTTP_201_CREATED
+                message = 'Topic created successfully.'
+            else:
+                success = False
+                message = ''
+                for value in serializer.errors.values():
+                    message += value[0][:-1].capitalize() + '.'
+                status_code = status.HTTP_400_BAD_REQUEST
+
+        response = {
+            'success': success,
+            'status code': status_code,
+            'message': message,
+        }
+
+        return Response(response, status=status_code)
+
+    @permission_classes((AllowAny,))
+    def get(self, request):
+        if request.data.get('name') is None:
+            data = Topic.objects.all().values()
+            success = True
+            status_code = status.HTTP_200_OK
+            message = 'Topics received successfully.'
+        else:
+            topic = Topic.objects.filter(name=request.data['name'])
+            if topic.exists():
+                data = topic.values().first()
+                success = True
+                status_code = status.HTTP_200_OK
+                message = 'Topic received successfully.'
+            else:
+                data = None
+                success = False
+                status_code = status.HTTP_404_NOT_FOUND
+                message = 'Topic does not exist.'
+
+        response = {
+            'success': success,
+            'status code': status_code,
+            'message': message,
+            'data': data
+        }
+
+        return Response(response, status=status_code)
+
+    @permission_classes((IsAdminUser,))
+    def put(self, request):
+        if request.data.get('id') is None:
+            success = False
+            status_code = status.HTTP_400_BAD_REQUEST
+            message = 'Topic id is required.'
+        else:
+            serializer = self.serializer_class(Topic.objects.get(
+                id=request.data['id']), data=request.data)
+
+            if serializer.is_valid():
+                serializer.save()
+                success = True
+                status_code = status.HTTP_200_OK
+                message = 'Topic updated successfully.'
+            else:
+                success = False
+                message = ''
+                for value in serializer.errors.values():
+                    message += value[0][:-1].capitalize() + '.'
+                status_code = status.HTTP_400_BAD_REQUEST
+
+        response = {
+            'success': success,
+            'status code': status_code,
+            'message': message
+        }
+
+        return Response(response, status=status_code)
+
+    @permission_classes((IsAdminUser,))
+    def delete(self, request):
+        if request.data.get('name') is None:
+            success = False
+            status_code = status.HTTP_400_BAD_REQUEST
+            message = 'Topic name is required.'
+        else:
+            topic = Topic.objects.filter(name=request.data['name'])
+            if topic.exists():
+                Topic.objects.filter(name=request.data['name']).delete()
+                success = True
+                status_code = status.HTTP_200_OK
+                message = 'Topic deleted successfully.'
+            else:
+                success = False
+                status_code = status.HTTP_404_NOT_FOUND
+                message = 'Topic does not exist.'
+
+        response = {
+            'success': success,
+            'status code': status_code,
+            'message': message,
         }
 
         return Response(response, status=status_code)

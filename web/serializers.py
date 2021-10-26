@@ -1,13 +1,12 @@
-from enum import unique
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import update_last_login
 
-from rest_framework import fields, serializers
+from rest_framework import serializers
 from rest_framework_jwt.settings import api_settings
 
 from web.models.topic import Topic
 
-from .models import User, Task
+from .models import User, Task, Topic
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
@@ -69,4 +68,15 @@ class TaskSerializer(serializers.ModelSerializer):
         model = Task
         fields = (
             'id', 'name', 'desc', 'complexity', 'topic', 'input', 'output', 'solution'
+        )
+
+
+class TopicSerializer(serializers.ModelSerializer):
+
+    name = serializers.CharField(required=False)
+
+    class Meta:
+        model = Topic
+        fields = (
+            'id', 'name', 'desc'
         )
