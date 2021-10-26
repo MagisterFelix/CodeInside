@@ -4,9 +4,7 @@ from django.contrib.auth.models import update_last_login
 from rest_framework import serializers
 from rest_framework_jwt.settings import api_settings
 
-from web.models.topic import Topic
-
-from .models import User, Task, Topic
+from .models import User, Task, Topic, Comment
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
@@ -59,6 +57,16 @@ class UserLoginSerializer(serializers.Serializer):
         return response
 
 
+class TopicSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Topic
+        fields = (
+            'id', 'name', 'desc'
+        )
+        extra_kwargs = {"name": {"required": False}}
+
+
 class TaskSerializer(serializers.ModelSerializer):
 
     topic = serializers.PrimaryKeyRelatedField(
@@ -69,14 +77,13 @@ class TaskSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'name', 'desc', 'complexity', 'topic', 'input', 'output', 'solution'
         )
+        extra_kwargs = {"name": {"required": False}}
 
 
-class TopicSerializer(serializers.ModelSerializer):
-
-    name = serializers.CharField(required=False)
+class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = Topic
+        model = Comment
         fields = (
-            'id', 'name', 'desc'
+            'user', 'task', 'message', 'datetime'
         )

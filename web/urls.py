@@ -1,6 +1,6 @@
 from django.conf.urls import url
 
-from .views import UserRegistrationView, UserLoginView, UserProfileView, TaskView, TopicView
+from .views import UserRegistrationView, UserLoginView, UserProfileView, TaskView, TopicView, CommentView
 
 urlpatterns = [
     url(r'signUp/', UserRegistrationView.as_view()),
@@ -8,4 +8,5 @@ urlpatterns = [
     url(r'profile/', UserProfileView.as_view()),
     url(r'^task/', TaskView.as_view()),
     url(r'^topic/', TopicView.as_view()),
+    url(r'^comment/', CommentView.as_view()),
 ]
