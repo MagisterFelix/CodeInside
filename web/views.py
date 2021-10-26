@@ -1,6 +1,5 @@
 from rest_framework import status
 from rest_framework.views import APIView
-from rest_framework.generics import CreateAPIView, RetrieveAPIView
 from rest_framework.response import Response
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 
@@ -9,7 +8,7 @@ from .serializers import UserRegistrationSerializer, UserLoginSerializer, TaskSe
 from .models import User, Task, Topic
 
 
-class UserRegistrationView(CreateAPIView):
+class UserRegistrationView(APIView):
 
     serializer_class = UserRegistrationSerializer
     permission_classes = (permissions.AllowAny,)
@@ -51,7 +50,7 @@ class UserRegistrationView(CreateAPIView):
         return Response(response, status=status_code)
 
 
-class UserLoginView(RetrieveAPIView):
+class UserLoginView(APIView):
 
     serializer_class = UserLoginSerializer
     permission_classes = (permissions.AllowAny,)
@@ -95,7 +94,7 @@ class UserLoginView(RetrieveAPIView):
         return Response(response, status=status_code)
 
 
-class UserProfileView(RetrieveAPIView):
+class UserProfileView(APIView):
 
     permission_classes = (permissions.IsAuthenticated,)
     authentication_class = JSONWebTokenAuthentication
