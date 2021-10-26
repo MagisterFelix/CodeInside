@@ -2,10 +2,9 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.generics import CreateAPIView, RetrieveAPIView
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
-from rest_framework.decorators import permission_classes, authentication_classes
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 
+from .permissions import permissions
 from .serializers import UserRegistrationSerializer, UserLoginSerializer, TaskSerializer, TopicSerializer
 from .models import User, Task, Topic
 
@@ -13,7 +12,7 @@ from .models import User, Task, Topic
 class UserRegistrationView(CreateAPIView):
 
     serializer_class = UserRegistrationSerializer
-    permission_classes = (AllowAny,)
+    permission_classes = (permissions.AllowAny,)
 
     def post(self, request):
         if request.data.get('email') is None:
@@ -55,7 +54,7 @@ class UserRegistrationView(CreateAPIView):
 class UserLoginView(RetrieveAPIView):
 
     serializer_class = UserLoginSerializer
-    permission_classes = (AllowAny,)
+    permission_classes = (permissions.AllowAny,)
 
     def post(self, request):
         if request.data.get('email') is None:
@@ -98,7 +97,7 @@ class UserLoginView(RetrieveAPIView):
 
 class UserProfileView(RetrieveAPIView):
 
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (permissions.IsAuthenticated,)
     authentication_class = JSONWebTokenAuthentication
 
     def get(self, request):
@@ -133,8 +132,8 @@ class TaskView(APIView):
 
     serializer_class = TaskSerializer
     http_method_names = ['post', 'get', 'put', 'delete', 'options']
+    permission_classes = (permissions.IsAdminUserOrReadOnly,)
 
-    @permission_classes((IsAdminUser,))
     def post(self, request):
         if request.data.get('name') is None:
             success = False
@@ -172,7 +171,6 @@ class TaskView(APIView):
 
         return Response(response, status=status_code)
 
-    @permission_classes((AllowAny,))
     def get(self, request):
         if request.data.get('name') is None:
             data = Task.objects.all().values("id", "name", "desc",
@@ -203,7 +201,6 @@ class TaskView(APIView):
 
         return Response(response, status=status_code)
 
-    @permission_classes((IsAdminUser,))
     def put(self, request):
         if request.data.get('id') is None:
             success = False
@@ -246,7 +243,6 @@ class TaskView(APIView):
 
         return Response(response, status=status_code)
 
-    @permission_classes((IsAdminUser,))
     def delete(self, request):
         if request.data.get('name') is None:
             success = False
@@ -277,8 +273,8 @@ class TopicView(APIView):
 
     serializer_class = TopicSerializer
     http_method_names = ['post', 'get', 'put', 'delete', 'options']
+    permission_classes = (permissions.IsAdminUserOrReadOnly,)
 
-    @permission_classes((IsAdminUser,))
     def post(self, request):
         if request.data.get('name') is None:
             success = False
@@ -307,7 +303,6 @@ class TopicView(APIView):
 
         return Response(response, status=status_code)
 
-    @permission_classes((AllowAny,))
     def get(self, request):
         if request.data.get('name') is None:
             data = Topic.objects.all().values()
@@ -336,7 +331,6 @@ class TopicView(APIView):
 
         return Response(response, status=status_code)
 
-    @permission_classes((IsAdminUser,))
     def put(self, request):
         if request.data.get('id') is None:
             success = False
@@ -366,7 +360,6 @@ class TopicView(APIView):
 
         return Response(response, status=status_code)
 
-    @permission_classes((IsAdminUser,))
     def delete(self, request):
         if request.data.get('name') is None:
             success = False
