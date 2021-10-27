@@ -130,8 +130,36 @@ class UserProfileView(APIView):
 class TopicView(APIView):
 
     serializer_class = TopicSerializer
-    http_method_names = ['post', 'get', 'put', 'delete', 'options']
+    http_method_names = ['get', 'post', 'put', 'delete', 'options']
     permission_classes = (permissions.IsAdminUserOrReadOnly,)
+
+    def get(self, request, primary_key=None):
+        if primary_key is None:
+            data = Topic.objects.all().values()
+            success = True
+            status_code = status.HTTP_200_OK
+            message = 'Topics received successfully.'
+        else:
+            topic = Topic.objects.filter(id=primary_key)
+            if topic.exists():
+                data = topic.values("name", "desc").first()
+                success = True
+                status_code = status.HTTP_200_OK
+                message = 'Topic received successfully.'
+            else:
+                data = None
+                success = False
+                status_code = status.HTTP_404_NOT_FOUND
+                message = 'Topic does not exist.'
+
+        response = {
+            'success': success,
+            'status code': status_code,
+            'message': message,
+            'data': data
+        }
+
+        return Response(response, status=status_code)
 
     def post(self, request):
         if request.data.get('name') is None:
@@ -161,43 +189,16 @@ class TopicView(APIView):
 
         return Response(response, status=status_code)
 
-    def get(self, request):
-        if request.data.get('name') is None:
-            data = Topic.objects.all().values()
-            success = True
-            status_code = status.HTTP_200_OK
-            message = 'Topics received successfully.'
-        else:
-            topic = Topic.objects.filter(name=request.data['name'])
-            if topic.exists():
-                data = topic.values().first()
-                success = True
-                status_code = status.HTTP_200_OK
-                message = 'Topic received successfully.'
-            else:
-                data = None
-                success = False
-                status_code = status.HTTP_404_NOT_FOUND
-                message = 'Topic does not exist.'
-
-        response = {
-            'success': success,
-            'status code': status_code,
-            'message': message,
-            'data': data
-        }
-
-        return Response(response, status=status_code)
-
-    def put(self, request):
-        if request.data.get('id') is None:
+    def put(self, request, primary_key=None):
+        if primary_key is None:
             success = False
             status_code = status.HTTP_400_BAD_REQUEST
             message = 'Topic id is required.'
         else:
-            topic = Topic.objects.filter(id=request.data['id'])
+            topic = Topic.objects.filter(id=primary_key)
             if topic.exists():
-                serializer = self.serializer_class(topic, data=request.data)
+                serializer = self.serializer_class(
+                    topic.first(), data=request.data)
 
                 if serializer.is_valid():
                     serializer.save()
@@ -223,15 +224,15 @@ class TopicView(APIView):
 
         return Response(response, status=status_code)
 
-    def delete(self, request):
-        if request.data.get('name') is None:
+    def delete(self, request, primary_key=None):
+        if primary_key is None:
             success = False
             status_code = status.HTTP_400_BAD_REQUEST
-            message = 'Topic name is required.'
+            message = 'Topic id is required.'
         else:
-            topic = Topic.objects.filter(name=request.data['name'])
+            topic = Topic.objects.filter(id=primary_key)
             if topic.exists():
-                Topic.objects.filter(name=request.data['name']).delete()
+                Topic.objects.filter(id=primary_key).delete()
                 success = True
                 status_code = status.HTTP_200_OK
                 message = 'Topic deleted successfully.'
@@ -252,8 +253,37 @@ class TopicView(APIView):
 class TaskView(APIView):
 
     serializer_class = TaskSerializer
-    http_method_names = ['post', 'get', 'put', 'delete', 'options']
+    http_method_names = ['get', 'post', 'put', 'delete', 'options']
     permission_classes = (permissions.IsAdminUserOrReadOnly,)
+
+    def get(self, request, primary_key=None):
+        if primary_key is None:
+            data = Task.objects.all().values("id", "name", "desc",
+                                             "complexity", "topic__name", "input", "output", "solution")
+            success = True
+            status_code = status.HTTP_200_OK
+            message = 'Tasks received successfully.'
+        else:
+            if Task.objects.filter(id=primary_key).exists():
+                data = Task.objects.filter(id=primary_key).values("name", "desc",
+                                                                  "complexity", "topic__name", "input", "output", "solution").first()
+                success = True
+                status_code = status.HTTP_200_OK
+                message = 'Task received successfully.'
+            else:
+                data = None
+                success = False
+                status_code = status.HTTP_404_NOT_FOUND
+                message = 'Task does not exist.'
+
+        response = {
+            'success': success,
+            'status code': status_code,
+            'message': message,
+            'data': data
+        }
+
+        return Response(response, status=status_code)
 
     def post(self, request):
         if request.data.get('name') is None:
@@ -292,43 +322,13 @@ class TaskView(APIView):
 
         return Response(response, status=status_code)
 
-    def get(self, request):
-        if request.data.get('name') is None:
-            data = Task.objects.all().values("id", "name", "desc",
-                                             "complexity", "topic__name", "input", "output", "solution")
-            success = True
-            status_code = status.HTTP_200_OK
-            message = 'Tasks received successfully.'
-        else:
-            task_name = request.data['name']
-            if Task.objects.filter(name=task_name).exists():
-                data = Task.objects.filter(name=task_name).values("id", "name", "desc",
-                                                                  "complexity", "topic__name", "input", "output", "solution").first()
-                success = True
-                status_code = status.HTTP_200_OK
-                message = 'Task received successfully.'
-            else:
-                data = None
-                success = False
-                status_code = status.HTTP_404_NOT_FOUND
-                message = 'Task does not exist.'
-
-        response = {
-            'success': success,
-            'status code': status_code,
-            'message': message,
-            'data': data
-        }
-
-        return Response(response, status=status_code)
-
-    def put(self, request):
-        if request.data.get('id') is None:
+    def put(self, request, primary_key=None):
+        if primary_key is None:
             success = False
             status_code = status.HTTP_400_BAD_REQUEST
             message = 'Task id is required.'
         else:
-            task = Task.objects.filter(id=request.data['id'])
+            task = Task.objects.filter(id=primary_key)
             if task.exists():
                 topic = request.data.get('topic')
                 if topic is not None:
@@ -343,10 +343,10 @@ class TaskView(APIView):
                             'message': 'Topic does not exist.'
                         }, status=status_code)
 
-                serializer = self.serializer_class(Task.objects.get(
-                    id=request.data['id']), data=request.data)
+                serializer = self.serializer_class(
+                    Task.objects.get(id=primary_key), data=request.data)
 
-                if serializer.is_valid(raise_exception=True):
+                if serializer.is_valid():
                     serializer.save()
                     success = True
                     status_code = status.HTTP_200_OK
@@ -370,15 +370,15 @@ class TaskView(APIView):
 
         return Response(response, status=status_code)
 
-    def delete(self, request):
-        if request.data.get('name') is None:
+    def delete(self, request, primary_key=None):
+        if primary_key is None:
             success = False
             status_code = status.HTTP_400_BAD_REQUEST
-            message = 'Task name is required.'
+            message = 'Task id is required.'
         else:
-            task = Task.objects.filter(name=request.data['name'])
+            task = Task.objects.filter(id=primary_key)
             if task.exists():
-                Task.objects.filter(name=request.data['name']).delete()
+                Task.objects.filter(id=primary_key).delete()
                 success = True
                 status_code = status.HTTP_200_OK
                 message = 'Task deleted successfully.'
@@ -399,8 +399,42 @@ class TaskView(APIView):
 class CommentView(APIView):
 
     serializer_class = CommentSerializer
-    http_method_names = ['post', 'get', 'delete', 'options']
-    permission_classes = (permissions.IsAuthenticated,)
+    http_method_names = ['get', 'post', 'delete', 'options']
+    permission_classes = (permissions.IsAdminUserOrIsAuthenticated,)
+
+    def get(self, request, primary_key=None):
+        if primary_key is None:
+            data = None
+            success = False
+            status_code = status.HTTP_400_BAD_REQUEST
+            message = 'Task id is required.'
+        else:
+            task = Task.objects.filter(id=primary_key)
+            if task.exists():
+                data = Comment.objects.filter(
+                    task=primary_key).values("id", "user__name", "message", "datetime")
+
+                for comment in data:
+                    comment['datetime'] = comment['datetime'].strftime(
+                        '%m/%d/%Y %H:%M')
+
+                success = True
+                status_code = status.HTTP_200_OK
+                message = 'Comments received successfully.'
+            else:
+                data = None
+                success = False
+                status_code = status.HTTP_404_NOT_FOUND
+                message = 'Task does not exist.'
+
+        response = {
+            'success': success,
+            'status code': status_code,
+            'message': message,
+            'data': data
+        }
+
+        return Response(response, status=status_code)
 
     def post(self, request):
         if request.data.get('task') is None:
@@ -440,46 +474,13 @@ class CommentView(APIView):
 
         return Response(response, status=status_code)
 
-    def get(self, request):
-        if request.data.get('task') is None:
-            success = False
-            status_code = status.HTTP_400_BAD_REQUEST
-            message = 'Task name is required.'
-        else:
-            task = Task.objects.filter(name=request.data['task'])
-            if task.exists():
-                data = Comment.objects.filter(
-                    task=task.first().id).values("id", "user__name", "message", "datetime")
-
-                for comment in data:
-                    comment['datetime'] = comment['datetime'].strftime(
-                        '%m/%d/%Y %H:%M')
-
-                success = True
-                status_code = status.HTTP_200_OK
-                message = 'Comments received successfully.'
-            else:
-                data = None
-                success = False
-                status_code = status.HTTP_404_NOT_FOUND
-                message = 'Task does not exist.'
-
-        response = {
-            'success': success,
-            'status code': status_code,
-            'message': message,
-            'data': data
-        }
-
-        return Response(response, status=status_code)
-
-    def delete(self, request):
-        if request.data.get('id') is None:
+    def delete(self, request, primary_key=None):
+        if primary_key is None:
             success = False
             status_code = status.HTTP_400_BAD_REQUEST
             message = 'Comment id is required.'
         else:
-            comment = Comment.objects.filter(id=request.data['id'])
+            comment = Comment.objects.filter(id=primary_key)
             if comment.exists():
                 comment.delete()
                 success = True
