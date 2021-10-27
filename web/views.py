@@ -3,6 +3,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 
+from pytz import timezone
+
 from .permissions import permissions
 from .serializers import UserRegistrationSerializer, UserLoginSerializer, TaskSerializer, TopicSerializer, CommentSerializer
 from .models import User, Task, Topic, Comment
@@ -22,6 +24,10 @@ class UserRegistrationView(APIView):
             success = False
             status_code = status.HTTP_400_BAD_REQUEST
             message = 'User must have a password.'
+        elif request.data.get('time_zone') is None:
+            success = False
+            status_code = status.HTTP_400_BAD_REQUEST
+            message = 'Time zone is required.'
         else:
             if request.data.get('birthday') is not None:
                 month, day, year = request.data['birthday'].split('/')
@@ -115,6 +121,7 @@ class UserProfileView(APIView):
             'banned': banned,
             'premium': user.premium,
             'birthday': birthday,
+            'time_zone': user.time_zone
         }
 
         response = {
@@ -130,7 +137,6 @@ class UserProfileView(APIView):
 class TopicView(APIView):
 
     serializer_class = TopicSerializer
-    http_method_names = ['get', 'post', 'put', 'delete', 'options']
     permission_classes = (permissions.IsAdminUserOrReadOnly,)
 
     def get(self, request, primary_key=None):
@@ -253,7 +259,6 @@ class TopicView(APIView):
 class TaskView(APIView):
 
     serializer_class = TaskSerializer
-    http_method_names = ['get', 'post', 'put', 'delete', 'options']
     permission_classes = (permissions.IsAdminUserOrReadOnly,)
 
     def get(self, request, primary_key=None):
@@ -399,7 +404,6 @@ class TaskView(APIView):
 class CommentView(APIView):
 
     serializer_class = CommentSerializer
-    http_method_names = ['get', 'post', 'delete', 'options']
     permission_classes = (permissions.IsAdminUserOrIsAuthenticated,)
 
     def get(self, request, primary_key=None):
@@ -415,7 +419,7 @@ class CommentView(APIView):
                     task=primary_key).values("id", "user__name", "message", "datetime")
 
                 for comment in data:
-                    comment['datetime'] = comment['datetime'].strftime(
+                    comment['datetime'] = comment['datetime'].astimezone(timezone(request.user.time_zone)).strftime(
                         '%m/%d/%Y %H:%M')
 
                 success = True
