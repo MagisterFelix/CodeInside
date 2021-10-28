@@ -25,11 +25,12 @@ class UserAdmin(UserAdmin):
     list_display = ('email', 'name',)
     ordering = ('email',)
     search_fields = ('email',)
+    readonly_fields = ('time_zone',)
     fieldsets = (
         (None, {
             'fields': (
                 'email', 'password', 'name', 'is_active', 'is_staff', 'is_superuser',
-                'premium', 'birthday', 'achievement',)
+                'premium', 'birthday', 'achievement', 'time_zone',)
         }),
     )
     add_fieldsets = (

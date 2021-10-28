@@ -6,17 +6,21 @@ from .achievement import Achievement
 
 class UserManager(BaseUserManager):
 
-    def create_user(self, email, password, name=None, birthday=None):
+    def create_user(self, email, password, name=None, birthday=None, time_zone=None):
         if email is None:
             raise ValueError('Users must have an email.')
 
         if name is None:
             name = email[:email.find('@')]
 
+        if time_zone is None:
+            time_zone = 'UTC'
+
         user = self.model(
             email=self.normalize_email(email),
             name=name,
-            birthday=birthday
+            birthday=birthday,
+            time_zone=time_zone
         )
         user.set_password(password)
         user.save(using=self._db)
@@ -49,6 +53,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     premium = models.BooleanField(default=False)
     birthday = models.DateField(blank=True, null=True)
     achievement = models.ManyToManyField(Achievement, blank=True)
+    time_zone = models.CharField(max_length=32, default='UTC')
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []

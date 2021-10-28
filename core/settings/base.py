@@ -9,6 +9,8 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 
 DEBUG = False
 
+FUTURE_TESTS = False
+
 ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
