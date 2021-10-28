@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import argparse
 import os
 import sys
 
@@ -14,7 +15,16 @@ def main():
             "available on your PYTHONPATH environment variable? Did you "
             "forget to activate a virtual environment?"
         ) from exc
-    execute_from_command_line(sys.argv)
+    argv = sys.argv
+
+    if 'test' in argv:
+        parser = argparse.ArgumentParser(add_help=False)
+        parser.add_argument('-f', '--future', action='store_true')
+        args, argv = parser.parse_known_args(argv)
+        from django.conf import settings
+        settings.FUTURE_TESTS = args.future
+
+    execute_from_command_line(argv)
 
 
 if __name__ == '__main__':
