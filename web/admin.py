@@ -47,12 +47,22 @@ class AchievementAdmin(admin.ModelAdmin):
     ordering = ('name',)
     search_fields = ('name', 'desc',)
 
+    def get_form(self, request, obj=None, **kwargs):
+        kwargs['widgets'] = {'desc': forms.Textarea(
+            attrs={'rows': 5, 'cols': 100})}
+        return super().get_form(request, obj, **kwargs)
+
 
 @admin.register(Comment)
 class CommentAdmin(admin.ModelAdmin):
     list_display = ('user', 'task', 'message', 'datetime',)
     ordering = ('-datetime',)
     search_fields = ('message',)
+
+    def get_form(selfT, request, obj=None, **kwargs):
+        kwargs['widgets'] = {'message': forms.Textarea(
+            attrs={'rows': 5, 'cols': 100})}
+        return super().get_form(request, obj, **kwargs)
 
 
 @admin.register(Submission)
@@ -69,12 +79,22 @@ class TaskAdmin(admin.ModelAdmin):
     ordering = ('topic', 'name',)
     search_fields = ('name',)
 
+    def get_form(self, request, obj=None, **kwargs):
+        kwargs['widgets'] = {'desc': forms.Textarea(
+            attrs={'rows': 15, 'cols': 100})}
+        return super().get_form(request, obj, **kwargs)
+
 
 @admin.register(Topic)
 class TopicAdmin(admin.ModelAdmin):
     list_display = ('name', 'desc',)
     ordering = ('name',)
     search_fields = ('name',)
+
+    def get_form(selfT, request, obj=None, **kwargs):
+        kwargs['widgets'] = {'desc': forms.Textarea(
+            attrs={'rows': 10, 'cols': 100})}
+        return super().get_form(request, obj, **kwargs)
 
 
 admin.site.unregister(Group)

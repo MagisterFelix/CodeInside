@@ -114,7 +114,7 @@ class UserModelTest(TestCase):
 
     def test_user_achievements(self):
         u = User.objects.get(id=1)
-        a = Achievement.objects.create(name=f"A1", desc="D1", discount=0)
+        a = Achievement.objects.create(name="A1", desc="D1", discount=0)
         before_add_achievements = u.achievement.count()
         u.achievement.add(a)
         after_add_achievements = u.achievement.count()

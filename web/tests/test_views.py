@@ -138,13 +138,13 @@ class TopicViewTest(TestCase):
         User.objects.create_user(
             email=user_mail, password=strong_password, name='User', birthday='2000-12-13')
 
-        Topic.objects.create(name=f'Static_Topic', desc=f'Static_Description')
+        Topic.objects.create(name='Static_Topic', desc='Static_Description')
 
     def setUp(self):
         self.factory = APIRequestFactory()
         self.admin = User.objects.get(is_superuser=True)
         self.user = User.objects.get(is_superuser=False)
-        Topic.objects.create(name=f'Dynamic_Topic', desc=f'Dynamic_Description')
+        Topic.objects.create(name='Dynamic_Topic', desc='Dynamic_Description')
 
     def test_topic_create(self):
         topics_before = Topic.objects.count()

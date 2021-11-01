@@ -1,3 +1,5 @@
+from django.shortcuts import render
+
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -6,8 +8,13 @@ from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from pytz import timezone
 
 from .permissions import permissions
-from .serializers import UserRegistrationSerializer, UserLoginSerializer, TaskSerializer, TopicSerializer, CommentSerializer
+from .serializers import UserRegistrationSerializer, UserLoginSerializer, \
+    TaskSerializer, TopicSerializer, CommentSerializer
 from .models import User, Task, Topic, Comment
+
+
+def index(request):
+    return render(request, 'index.html')
 
 
 class UserRegistrationView(APIView):
@@ -271,7 +278,8 @@ class TaskView(APIView):
         else:
             if Task.objects.filter(id=primary_key).exists():
                 data = Task.objects.filter(id=primary_key).values("name", "desc",
-                                                                  "complexity", "topic__name", "input", "output", "solution").first()
+                                                                  "complexity", "topic__name", "input", "output",
+                                                                  "solution").first()
                 success = True
                 status_code = status.HTTP_200_OK
                 message = 'Task received successfully.'
