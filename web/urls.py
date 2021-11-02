@@ -5,6 +5,7 @@ from web.views.auth_view import UserRegistrationView, UserLoginView, UserProfile
 from web.views.topic_view import TopicView
 from web.views.task_view import TaskView
 from web.views.comment_view import CommentView
+from web.views.submission_view import SubmissionView
 
 urlpatterns = [
     url(r'^$', BaseView.as_view()),
@@ -17,4 +18,6 @@ urlpatterns = [
     url(r'^tasks/(?P<primary_key>\d+)/?$', TaskView.as_view()),
     url(r'^comments/?$', CommentView.as_view()),
     url(r'^comments/(?P<primary_key>\d+)/?$', CommentView.as_view()),
+    url(r'^submissions/?$', SubmissionView.as_view()),
+    url(r'^submissions/(?P<primary_key>\d+)/?$', SubmissionView.as_view()),
 ]

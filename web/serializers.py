@@ -4,7 +4,7 @@ from django.contrib.auth.models import update_last_login
 from rest_framework import serializers
 from rest_framework_jwt.settings import api_settings
 
-from .models import User, Task, Topic, Comment
+from .models import User, Task, Topic, Comment, Submission
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
@@ -87,3 +87,21 @@ class CommentSerializer(serializers.ModelSerializer):
         fields = (
             'user', 'task', 'message', 'datetime'
         )
+
+
+class SubmissionSerializer(serializers.ModelSerializer):
+    language = serializers.ChoiceField(choices=['Python', 'C++', 'C#', 'Java', 'JavaScript'])
+
+    class Meta:
+        model = Submission
+        fields = (
+            'task', 'user', 'language'
+        )
+
+    def create(self, validated_data):
+        statuses = dict((value, key) for key, value in Submission._meta.get_field('status').choices)
+        languages = dict((value, key) for key, value in Submission._meta.get_field('language').choices)
+        validated_data['status'] = statuses.get(validated_data['status'])
+        validated_data['language'] = languages.get(validated_data['language'])
+        submission = Submission.objects.create(**validated_data)
+        return submission
