@@ -1,6 +1,7 @@
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 
 from pytz import timezone
 
@@ -13,6 +14,7 @@ class CommentView(APIView):
 
     serializer_class = CommentSerializer
     permission_classes = (permissions.IsAdminUserOrIsAuthenticated,)
+    authentication_class = JSONWebTokenAuthentication
 
     def get(self, request, primary_key=None):
         if primary_key is None:

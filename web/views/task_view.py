@@ -1,6 +1,7 @@
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 
 from web.permissions import permissions
 from web.serializers import TaskSerializer
@@ -11,6 +12,7 @@ class TaskView(APIView):
 
     serializer_class = TaskSerializer
     permission_classes = (permissions.IsAdminUserOrReadOnly,)
+    authentication_class = JSONWebTokenAuthentication
 
     def get(self, request, primary_key=None):
         if primary_key is None:
