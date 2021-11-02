@@ -3,8 +3,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 
-from pytz import timezone
-
+from web.utility import convert_datetime
 from web.permissions import permissions
 from web.serializers import CommentSerializer
 from web.models import Comment, Task
@@ -29,8 +28,7 @@ class CommentView(APIView):
                     task=primary_key).values("id", "user__name", "message", "datetime")
 
                 for comment in data:
-                    comment['datetime'] = comment['datetime'].astimezone(timezone(request.user.time_zone)).strftime(
-                        '%m/%d/%Y %H:%M')
+                    comment['datetime'] = convert_datetime(comment['datetime'], request.user.time_zone)
 
                 success = True
                 status_code = status.HTTP_200_OK
