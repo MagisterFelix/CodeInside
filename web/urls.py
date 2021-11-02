@@ -1,6 +1,10 @@
 from django.conf.urls import url
 
-from .views import index, UserRegistrationView, UserLoginView, UserProfileView, TaskView, TopicView, CommentView
+from web.views.index_view import index
+from web.views.auth_view import UserRegistrationView, UserLoginView, UserProfileView
+from web.views.topic_view import TopicView
+from web.views.task_view import TaskView
+from web.views.comment_view import CommentView
 
 urlpatterns = [
     url(r'^$', index),

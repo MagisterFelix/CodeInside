@@ -2,8 +2,11 @@ from django.test import TestCase
 from rest_framework.exceptions import ErrorDetail
 from rest_framework.test import APIRequestFactory, force_authenticate
 
-from web.views import UserRegistrationView, UserLoginView, UserProfileView, TopicView, TaskView, CommentView
 from web.models import User, Topic, Task, Comment
+from web.views.auth_view import UserRegistrationView, UserLoginView, UserProfileView
+from web.views.topic_view import TopicView
+from web.views.task_view import TaskView
+from web.views.comment_view import CommentView
 
 
 class AuthViewTest(TestCase):
