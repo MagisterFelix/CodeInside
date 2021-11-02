@@ -1,13 +1,13 @@
 from django.conf.urls import url
 
-from web.views.index_view import index
+from web.views.base_view import BaseView
 from web.views.auth_view import UserRegistrationView, UserLoginView, UserProfileView
 from web.views.topic_view import TopicView
 from web.views.task_view import TaskView
 from web.views.comment_view import CommentView
 
 urlpatterns = [
-    url(r'^$', index),
+    url(r'^$', BaseView.as_view()),
     url(r'^signUp/?$', UserRegistrationView.as_view()),
     url(r'^signIn/?$', UserLoginView.as_view()),
     url(r'^profile/?$', UserProfileView.as_view()),
