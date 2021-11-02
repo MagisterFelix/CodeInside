@@ -36,7 +36,7 @@ class Submission(models.Model):
         (CPP, 'C++'),
         (SHARP, 'C#'),
         (JAVA, 'Java'),
-        (JAVASCRIPT, 'Javascript'),
+        (JAVASCRIPT, 'JavaScript'),
     ]
 
     language = models.IntegerField(choices=LANGUAGES)
