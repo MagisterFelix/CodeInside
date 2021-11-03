@@ -21,25 +21,30 @@ class SubmissionView(APIView):
             data = Submission.objects.all()\
                 .annotate(lang=WithChoices(Submission, "language"), result=WithChoices(Submission, "status")) \
                 .values("id", "task__name", "user__name", "result", "datetime", "lang", "time", "memory")
+
             for submission in data:
                 submission['datetime'] = convert_datetime(submission['datetime'], request.user.time_zone)
+
             success = True
             status_code = status.HTTP_200_OK
             message = 'Submissions received successfully.'
         else:
-            if Submission.objects.filter(id=primary_key).exists():
-                data = Submission.objects.filter(id=primary_key) \
+            if Task.objects.filter(id=primary_key).exists():
+                data = Submission.objects.filter(task=primary_key) \
                     .annotate(lang=WithChoices(Submission, "language"), result=WithChoices(Submission, "status")) \
                     .values("id", "task__name", "user__name", "result", "datetime", "lang", "time", "memory")
-                submission['datetime'] = convert_datetime(submission['datetime'], request.user.time_zone)
+
+                for submission in data:
+                    submission['datetime'] = convert_datetime(submission['datetime'], request.user.time_zone)
+
                 success = True
                 status_code = status.HTTP_200_OK
-                message = 'Submission received successfully.'
+                message = 'Submissions received successfully.'
             else:
                 data = None
                 success = False
                 status_code = status.HTTP_404_NOT_FOUND
-                message = 'Submission does not exist.'
+                message = 'Task does not exist.'
 
         response = {
             'success': success,
