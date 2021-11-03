@@ -40,8 +40,8 @@ class Submission(models.Model):
     ]
 
     language = models.IntegerField(choices=LANGUAGES)
-    time = models.CharField(max_length=4)
-    memory = models.CharField(max_length=3)
+    time = models.CharField(max_length=9)
+    memory = models.CharField(max_length=8)
 
     class Meta:
         db_table = "submission"

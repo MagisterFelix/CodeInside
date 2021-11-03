@@ -80,8 +80,12 @@ class TaskAdmin(admin.ModelAdmin):
     search_fields = ('name',)
 
     def get_form(self, request, obj=None, **kwargs):
-        kwargs['widgets'] = {'desc': forms.Textarea(
-            attrs={'rows': 15, 'cols': 100})}
+        kwargs['widgets'] = {
+            'desc': forms.Textarea(attrs={'rows': 15, 'cols': 100}),
+            'input': forms.Textarea(attrs={'rows': 25, 'cols': 25}),
+            'output': forms.Textarea(attrs={'rows': 25, 'cols': 25}),
+            'solution': forms.Textarea(attrs={'rows': 15, 'cols': 100})
+        }
         return super().get_form(request, obj, **kwargs)
 
 
