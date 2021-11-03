@@ -68,7 +68,7 @@ class CommentView(APIView):
                     status_code = status.HTTP_201_CREATED
                     message = 'Comment created successfully.'
 
-                    u = User.objects.get(email=request.data.get('email'))
+                    u = User.objects.get(pk=request.user.id)
                     a = Achievement.objects.get(name='COMMENTATOR')
                     if not u.achievement.filter(name='COMMENTATOR').exists():
                         u.achievement.add(a)

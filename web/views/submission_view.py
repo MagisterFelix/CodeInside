@@ -55,7 +55,6 @@ class SubmissionView(APIView):
         return Response(response, status=status_code)
 
     def post(self, request):
-        request.data._mutable = True
         if request.data.get('task') is None:
             data = None
             success = False
