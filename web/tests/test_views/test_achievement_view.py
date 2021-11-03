@@ -2,6 +2,7 @@ from django.test import TestCase
 from rest_framework.test import APIRequestFactory, force_authenticate
 
 from web.models import Achievement, User, Task, Topic
+from web.views.achievement_view import AchievementView
 from web.views.auth_view import UserLoginView
 from web.views.comment_view import CommentView
 from web.views.submission_view import SubmissionView
@@ -97,3 +98,22 @@ class AchievementViewTest(TestCase):
                 name__in=['TRAINEE', 'JUNIOR', 'MIDDLE', 'SENIOR', 'TECHNICAL EXPERT', 'YONGLING', 'PADAVAN', 'KNIGHT',
                           'MASTER', 'ELITE']).count(),
             achievements_after)
+
+    def test_achievement_read(self):
+        u = self.user
+        for num in range(3):
+            request = self.factory.post(path='submissions',
+                                        data={'task': f'1xStars#{num}', 'language': 'Python', 'code': 'print("bar")'},
+                                        format='json')
+            force_authenticate(request, user=u)
+            SubmissionView.as_view()(request)
+
+        request = self.factory.get(path='achievements',
+                                   format='json')
+        force_authenticate(request, user=u)
+        response = AchievementView.as_view()(request)
+        achievements = response.data.pop('data')
+        self.assertListEqual(list(achievements), [{'id': 3, 'name': 'TRAINEE', 'desc': '', 'link': '', 'discount': 0},
+                                                  {'id': 8, 'name': 'YONGLING', 'desc': '', 'link': '', 'discount': 0}])
+        self.assertDictEqual(response.data,
+                             {'success': True, 'status code': 200, 'message': 'Achievements received successfully.'})
