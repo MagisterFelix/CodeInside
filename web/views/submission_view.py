@@ -6,19 +6,18 @@ from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from web.utility import WithChoices, convert_datetime
 from web.permissions import permissions
 from web.serializers import SubmissionSerializer
-from web.models import Submission, Task
+from web.models import Submission, Task, Achievement
 from web.checker import Checker
 
 
 class SubmissionView(APIView):
-
     serializer_class = SubmissionSerializer
     permission_classes = (permissions.IsAuthenticated,)
     authentication_class = JSONWebTokenAuthentication
 
     def get(self, request, primary_key=None):
         if primary_key is None:
-            data = Submission.objects.all()\
+            data = Submission.objects.all() \
                 .annotate(lang=WithChoices(Submission, "language"), result=WithChoices(Submission, "status")) \
                 .values("id", "task__name", "user__name", "result", "datetime", "lang", "time", "memory")
 
@@ -56,6 +55,7 @@ class SubmissionView(APIView):
         return Response(response, status=status_code)
 
     def post(self, request):
+        request.data._mutable = True
         if request.data.get('task') is None:
             data = None
             success = False
@@ -81,6 +81,22 @@ class SubmissionView(APIView):
                     success = True
                     status_code = status.HTTP_201_CREATED
                     message = 'Submission created successfully.'
+
+                    u = request.user
+                    a = Achievement.objects.exclude(name__in=['ACQUAINTANCE', 'COMMENTATOR'])
+                    unique_solved = Submission.objects.filter(user=u, status=0).values('task').distinct()
+                    complexity = [0] * 5
+                    for sbm in unique_solved:
+                        task_pk = sbm['task']
+                        task = Task.objects.get(pk=task_pk)
+                        complexity[task.complexity - 1] += 1
+                    for idx, val in enumerate(['TRAINEE', 'JUNIOR', 'MIDDLE', 'SENIOR', 'TECHNICAL EXPERT']):
+                        if complexity[idx] > 0 and not u.achievement.filter(name=val).exists():
+                            u.achievement.add(a.get(name=val))
+                    for idx, val in enumerate(['YONGLING', 'PADAVAN', 'KNIGHT', 'MASTER', 'ELITE']):
+                        if complexity[idx] >= 3 and not u.achievement.filter(name=val).exists():
+                            u.achievement.add(a.get(name=val))
+
                 else:
                     data = None
                     success = False
