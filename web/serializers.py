@@ -4,11 +4,10 @@ from django.contrib.auth.models import update_last_login
 from rest_framework import serializers
 from rest_framework_jwt.settings import api_settings
 
-from .models import User, Task, Topic, Comment, Submission
+from .models import User, Task, Topic, Comment, Submission, Achievement
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = User
         fields = ('email', 'password', 'name', 'birthday', 'time_zone')
@@ -20,7 +19,6 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
 
 class UserLoginSerializer(serializers.Serializer):
-
     email = serializers.CharField(max_length=40)
     password = serializers.CharField(max_length=40, write_only=True)
     token = serializers.CharField(max_length=255, read_only=True)
@@ -58,7 +56,6 @@ class UserLoginSerializer(serializers.Serializer):
 
 
 class TopicSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Topic
         fields = (
@@ -68,7 +65,6 @@ class TopicSerializer(serializers.ModelSerializer):
 
 
 class TaskSerializer(serializers.ModelSerializer):
-
     topic = serializers.PrimaryKeyRelatedField(
         queryset=Topic.objects.all(), required=False)
 
@@ -81,7 +77,6 @@ class TaskSerializer(serializers.ModelSerializer):
 
 
 class CommentSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Comment
         fields = (
@@ -105,3 +100,11 @@ class SubmissionSerializer(serializers.ModelSerializer):
         validated_data['language'] = languages.get(validated_data['language'])
         submission = Submission.objects.create(**validated_data)
         return submission
+
+
+class AchievementSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Achievement
+        fields = (
+            'name', 'desc', 'link', 'discount'
+        )
