@@ -5,11 +5,10 @@ from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 
 from web.permissions import permissions
 from web.serializers import UserRegistrationSerializer, UserLoginSerializer
-from web.models import User
+from web.models import User, Achievement
 
 
 class UserRegistrationView(APIView):
-
     serializer_class = UserRegistrationSerializer
     permission_classes = (permissions.AllowAny,)
 
@@ -55,7 +54,6 @@ class UserRegistrationView(APIView):
 
 
 class UserLoginView(APIView):
-
     serializer_class = UserLoginSerializer
     permission_classes = (permissions.AllowAny,)
 
@@ -78,6 +76,12 @@ class UserLoginView(APIView):
                 status_code = status.HTTP_200_OK
                 message = 'User logged in successfully.'
                 token = serializer.data['token']
+
+                u = User.objects.get(email=request.data.get('email'))
+                a = Achievement.objects.get(name='ACQUAINTANCE')
+                if not u.achievement.filter(name='ACQUAINTANCE').exists():
+                    u.achievement.add(a)
+
             else:
                 success = False
                 message = ''
@@ -99,7 +103,6 @@ class UserLoginView(APIView):
 
 
 class UserProfileView(APIView):
-
     permission_classes = (permissions.IsAuthenticated,)
     authentication_class = JSONWebTokenAuthentication
 
