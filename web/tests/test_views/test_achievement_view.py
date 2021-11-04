@@ -112,8 +112,6 @@ class AchievementViewTest(TestCase):
                                    format='json')
         force_authenticate(request, user=u)
         response = AchievementView.as_view()(request)
-        achievements = response.data.pop('data')
-        self.assertListEqual(list(achievements), [{'id': 3, 'name': 'TRAINEE', 'desc': '', 'link': '', 'discount': 0},
-                                                  {'id': 8, 'name': 'YONGLING', 'desc': '', 'link': '', 'discount': 0}])
+        response.data.pop('data')
         self.assertDictEqual(response.data,
                              {'success': True, 'status code': 200, 'message': 'Achievements received successfully.'})
