@@ -31,7 +31,8 @@ class AchievementViewTest(TestCase):
                                     output='bar', solution='')
         for achieve_name in ['ACQUAINTANCE', 'COMMENTATOR', 'TRAINEE', 'JUNIOR', 'MIDDLE', 'SENIOR', 'TECHNICAL EXPERT',
                              'YONGLING', 'PADAVAN', 'KNIGHT', 'MASTER', 'ELITE',
-                             'PYTHON DEV', 'C++ DEV', 'C# DEV', 'JAVA DEV', 'JAVASCRIPT DEV']:
+                             'PYTHON DEV', 'C++ DEV', 'C# DEV', 'JAVA DEV', 'JAVASCRIPT DEV',
+                             'ACCEPTED', 'WRONG ANSWER', 'TIME LIMITED']:
             Achievement.objects.create(name=achieve_name)
 
     def setUp(self):
@@ -79,7 +80,8 @@ class AchievementViewTest(TestCase):
         self.assertGreater(achievements_after, achievements_before)
         self.assertEquals(
             u.achievement.filter(
-                name__in=['TRAINEE', 'JUNIOR', 'MIDDLE', 'SENIOR', 'TECHNICAL EXPERT', 'PYTHON DEV']).count(),
+                name__in=['TRAINEE', 'JUNIOR', 'MIDDLE', 'SENIOR', 'TECHNICAL EXPERT', 'PYTHON DEV',
+                          'ACCEPTED']).count(),
             achievements_after)
 
     def test_achievement_triplet(self):
@@ -98,7 +100,7 @@ class AchievementViewTest(TestCase):
         self.assertEquals(
             u.achievement.filter(
                 name__in=['TRAINEE', 'JUNIOR', 'MIDDLE', 'SENIOR', 'TECHNICAL EXPERT', 'YONGLING', 'PADAVAN', 'KNIGHT',
-                          'MASTER', 'ELITE', 'PYTHON DEV']).count(),
+                          'MASTER', 'ELITE', 'PYTHON DEV', 'ACCEPTED']).count(),
             achievements_after)
 
     def test_achievement_read(self):

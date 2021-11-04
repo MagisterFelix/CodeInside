@@ -101,8 +101,15 @@ class SubmissionView(APIView):
                                             'C#': 'C# DEV',
                                             'Java': 'JAVA DEV',
                                             'JavaScript': 'JAVASCRIPT DEV'}.get(request.data['language'])
-                    if not u.achievement.filter(name=language_achievement).exists():
+                    if data['status'] == 'Accepted' and not u.achievement.filter(name=language_achievement).exists():
                         u.achievement.add(a.get(name=language_achievement))
+                    status_achievement = {
+                        'Accepted': 'ACCEPTED',
+                        'Wrong answer': 'WRONG ANSWER',
+                        'Time limit exceeded': 'TIME LIMITED',
+                    }.get(data['status'])
+                    if status_achievement and not u.achievement.filter(name=status_achievement).exists():
+                        u.achievement.add(a.get(name=status_achievement))
 
                 else:
                     data = None
