@@ -96,6 +96,14 @@ class SubmissionView(APIView):
                         if complexity[idx] >= 3 and not u.achievement.filter(name=val).exists():
                             u.achievement.add(a.get(name=val))
 
+                    language_achievement = {'Python': 'PYTHON DEV',
+                                            'C++': 'C++ DEV',
+                                            'C#': 'C# DEV',
+                                            'Java': 'JAVA DEV',
+                                            'JavaScript': 'JAVASCRIPT DEV'}.get(request.data['language'])
+                    if not u.achievement.filter(name=language_achievement).exists():
+                        u.achievement.add(a.get(name=language_achievement))
+
                 else:
                     data = None
                     success = False
