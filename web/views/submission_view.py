@@ -30,9 +30,9 @@ class SubmissionView(APIView):
             message = 'Submissions received successfully.'
         else:
             if Task.objects.filter(id=primary_key).exists():
-                data = Submission.objects.filter(task=primary_key) \
+                data = Submission.objects.filter(task=primary_key, user=request.user.id) \
                     .annotate(lang=WithChoices(Submission, "language"), result=WithChoices(Submission, "status")) \
-                    .values("id", "task__name", "user__name", "result", "datetime", "lang", "time", "memory")
+                    .values("id", "task__name", "result", "datetime", "lang", "time", "memory")
 
                 for submission in data:
                     submission['datetime'] = convert_datetime(submission['datetime'], request.user.time_zone)
