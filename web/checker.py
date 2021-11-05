@@ -1,25 +1,9 @@
 import subprocess
-import tracemalloc
 from time import perf_counter
-from functools import wraps
+from memory_profiler import memory_usage
 
 
-def measure_performance(func):
-
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        tracemalloc.start()
-        start_time = perf_counter()
-        func(*args, **kwargs)
-        current, peak = tracemalloc.get_traced_memory()
-        finish_time = (perf_counter() - start_time) * 1000
-        tracemalloc.stop()
-        return (float(f'{finish_time:.2f}'), float(f'{peak / 1024.0 / 1024.0:.2f}'))
-
-    return wrapper
-
-
-class Checker():
+class Checker:
 
     def __init__(self, user, task, language, code):
         self.user = user
@@ -39,18 +23,28 @@ class Checker():
             'Java': '.java',
             'JavaScript': '.js'
         }
-        self._process = None
+        self._output = None
+        self._error = None
 
-    @measure_performance
-    def run(self, command, test=None):
-        if test:
-            self._process = subprocess.run(command, input=bytes(
-                test, encoding='utf-8'), capture_output=True, timeout=5, shell=True)
-        else:
-            self._process = subprocess.run(command, capture_output=True, timeout=5, shell=True)
+    def run(self, command, test=''):
+        start_time = perf_counter()
+        proc = subprocess.Popen(command,
+                                stdin=open(f'input_{self.user.id}.txt', 'r'),
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE,
+                                text=True,
+                                shell=True)
+        memory = sum(memory_usage(proc=proc, timeout=5.0))
+        self._output, self._error = (b_string.strip() for b_string in proc.communicate(input=test, timeout=5.0))
+        proc.kill()
+        finish_time = (perf_counter() - start_time) * 1000
+        return (float(f'{(finish_time):.2f}'), float(f'{memory:.2f}'))
 
     def check(self):
         input = self.task.input.split('\r\n\r\n')
+        with open(f'input_{self.user.id}.txt', 'w') as file:
+            file.write(input[0])
+
         expected_output = self.task.output.split('\r\n\r\n')
 
         time = 0
@@ -92,13 +86,16 @@ class Checker():
                 cmd = f'node {file_name}'
                 self.run(cmd, input[0])
 
-            if len(self._process.stderr):
+            if len(self._error) and self._error.find('JAVA_TOOL_OPTIONS') == -1:
                 self._status = 'System failure'
-                self._message = self._process.stderr.decode('utf-8').strip()
+                self._message = self._error
                 subprocess.run(f'rm {file_name}', shell=True)
                 return
 
             for test in input:
+                with open(f'input_{self.user.id}.txt', 'w') as file:
+                    file.write(test)
+
                 current_time, current_memory = self.run(cmd, test)
 
                 self._time = f'{current_time} ms'
@@ -116,7 +113,7 @@ class Checker():
                     self._memory = 'N/A'
                     break
 
-                output.append(self._process.stdout.decode('utf-8').strip())
+                output.append(self._output)
                 time = max(time, current_time)
                 memory = max(memory, current_memory)
             else:
@@ -129,7 +126,7 @@ class Checker():
             self._time = 'N/A'
             self._memory = 'N/A'
 
-        subprocess.run(f'rm {file_name}', shell=True)
+        subprocess.run(f'rm {file_name} input_{self.user.id}.txt', shell=True)
 
     def get_data(self):
         data = {
