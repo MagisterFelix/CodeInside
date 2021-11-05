@@ -1,7 +1,7 @@
 from django.test import TestCase
 from rest_framework.test import APIRequestFactory, force_authenticate
 
-from web.models import User, Topic, Task, Submission
+from web.models import User, Topic, Task, Submission, Achievement
 from web.views.submission_view import SubmissionView
 
 
@@ -25,6 +25,11 @@ class SubmissionViewTest(TestCase):
         Task.objects.create(name='stat_task', desc='', complexity=1, topic=topic, input='1', output='1', solution='')
         task = Task.objects.get(id=1)
         Submission.objects.create(task=task, user=user, status=0, language=0, time='50 ms', memory='0.11 MB')
+        for achieve_name in ['ACQUAINTANCE', 'COMMENTATOR', 'TRAINEE', 'JUNIOR', 'MIDDLE', 'SENIOR', 'TECHNICAL EXPERT',
+                             'YONGLING', 'PADAVAN', 'KNIGHT', 'MASTER', 'ELITE',
+                             'PYTHON DEV', 'C++ DEV', 'C# DEV', 'JAVA DEV', 'JAVASCRIPT DEV',
+                             'ACCEPTED', 'WRONG ANSWER', 'TIME LIMITED']:
+            Achievement.objects.create(name=achieve_name)
 
     def setUp(self):
         self.factory = APIRequestFactory()
