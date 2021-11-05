@@ -6,6 +6,7 @@ from web.views.topic_view import TopicView
 from web.views.task_view import TaskView
 from web.views.comment_view import CommentView
 from web.views.submission_view import SubmissionView
+from web.views.achievement_view import AchievementView
 
 urlpatterns = [
     url(r'^$', BaseView.as_view()),
@@ -20,4 +21,5 @@ urlpatterns = [
     url(r'^comments/(?P<primary_key>\d+)/?$', CommentView.as_view()),
     url(r'^submissions/?$', SubmissionView.as_view()),
     url(r'^submissions/(?P<primary_key>\d+)/?$', SubmissionView.as_view()),
+    url(r'^achievements/?$', AchievementView.as_view()),
 ]

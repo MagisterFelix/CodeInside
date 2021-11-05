@@ -6,7 +6,7 @@ from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from web.utility import convert_datetime
 from web.permissions import permissions
 from web.serializers import CommentSerializer
-from web.models import Comment, Task
+from web.models import Comment, Task, User, Achievement
 
 
 class CommentView(APIView):
@@ -67,6 +67,12 @@ class CommentView(APIView):
                     success = True
                     status_code = status.HTTP_201_CREATED
                     message = 'Comment created successfully.'
+
+                    u = User.objects.get(pk=request.user.id)
+                    a = Achievement.objects.get(name='COMMENTATOR')
+                    if not u.achievement.filter(name='COMMENTATOR').exists():
+                        u.achievement.add(a)
+
                 else:
                     success = False
                     message = ''
