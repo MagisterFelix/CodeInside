@@ -15,13 +15,13 @@ class Checker:
         self._time = 'N/A'
         self._memory = 'N/A'
         self._max_time = self.task.complexity * 1000
-        self._max_memory = 64
-        self._ext = {
-            'Python': '.py',
-            'C++': '.cpp',
-            'C#': '.cs',
-            'Java': '.java',
-            'JavaScript': '.js'
+        self._max_memory = 128
+        self._params = {
+            'Python': ('.py', 3.0),
+            'C++': ('.cpp', 15.0),
+            'C#': ('.cs', 5.0),
+            'Java': ('.java', 1.25),
+            'JavaScript': ('.js', 2.0)
         }
         self._output = None
         self._error = None
@@ -34,10 +34,10 @@ class Checker:
                                 stderr=subprocess.PIPE,
                                 text=True,
                                 shell=True)
-        memory = sum(memory_usage(proc=proc, timeout=5.0))
+        memory = sum(memory_usage(proc=proc, timeout=5.0)) + 0.1
         self._output, self._error = (b_string.strip() for b_string in proc.communicate(input=test, timeout=5.0))
+        finish_time = ((perf_counter() - start_time) * 1000) / self._params[self.language][1]
         proc.kill()
-        finish_time = (perf_counter() - start_time) * 1000
         return (float(f'{(finish_time):.2f}'), float(f'{memory:.2f}'))
 
     def check(self):
@@ -54,7 +54,7 @@ class Checker:
         if self.language == 'Java':
             self._code = self._code.replace('public class Main', f'class test_{self.user.id}')
 
-        file_name = f'test_{self.user.id}' + self._ext[self.language]
+        file_name = f'test_{self.user.id}' + self._params[self.language][0]
 
         with open(file_name, 'w') as file:
             file.write(self._code)
