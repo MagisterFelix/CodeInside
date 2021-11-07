@@ -48,7 +48,7 @@ class SubmissionModelTest(TestCase):
         s = Submission.objects.get(id=1)
         max_length = s._meta.get_field('time').max_length
         self.assertEquals(max_length, 9)
-
+  
     def test_memory_max_length(self):
         s = Submission.objects.get(id=1)
         max_length = s._meta.get_field('memory').max_length
