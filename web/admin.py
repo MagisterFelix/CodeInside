@@ -43,8 +43,8 @@ class UserAdmin(UserAdmin):
 
 @admin.register(Achievement)
 class AchievementAdmin(admin.ModelAdmin):
-    list_display = ('name', 'desc', 'discount',)
-    ordering = ('name',)
+    list_display = ('name', 'desc', 'link', 'discount',)
+    ordering = ('id',)
     search_fields = ('name', 'desc',)
 
     def get_form(self, request, obj=None, **kwargs):
@@ -59,7 +59,7 @@ class CommentAdmin(admin.ModelAdmin):
     ordering = ('-datetime',)
     search_fields = ('message',)
 
-    def get_form(selfT, request, obj=None, **kwargs):
+    def get_form(self, request, obj=None, **kwargs):
         kwargs['widgets'] = {'message': forms.Textarea(
             attrs={'rows': 5, 'cols': 100})}
         return super().get_form(request, obj, **kwargs)
@@ -80,8 +80,12 @@ class TaskAdmin(admin.ModelAdmin):
     search_fields = ('name',)
 
     def get_form(self, request, obj=None, **kwargs):
-        kwargs['widgets'] = {'desc': forms.Textarea(
-            attrs={'rows': 15, 'cols': 100})}
+        kwargs['widgets'] = {
+            'desc': forms.Textarea(attrs={'rows': 15, 'cols': 100}),
+            'input': forms.Textarea(attrs={'rows': 25, 'cols': 25}),
+            'output': forms.Textarea(attrs={'rows': 25, 'cols': 25}),
+            'solution': forms.Textarea(attrs={'rows': 15, 'cols': 100})
+        }
         return super().get_form(request, obj, **kwargs)
 
 

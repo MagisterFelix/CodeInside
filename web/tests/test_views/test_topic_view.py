@@ -2,7 +2,7 @@ from django.test import TestCase
 from rest_framework.test import APIRequestFactory, force_authenticate
 
 from web.models import User, Topic
-from web.views import TopicView
+from web.views.topic_view import TopicView
 
 
 class TopicViewTest(TestCase):

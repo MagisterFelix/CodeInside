@@ -2,8 +2,8 @@ from django.test import TestCase
 from rest_framework.exceptions import ErrorDetail
 from rest_framework.test import APIRequestFactory
 
-from web.models import User
-from web.views import UserRegistrationView, UserLoginView, UserProfileView
+from web.models import User, Achievement
+from web.views.auth_view import UserRegistrationView, UserLoginView, UserProfileView
 
 
 class AuthViewTest(TestCase):
@@ -14,6 +14,7 @@ class AuthViewTest(TestCase):
         user_mail = "default@gmail.com"
         User.objects.create_user(
             email=user_mail, password=strong_password, name="User", birthday="2000-12-13")
+        Achievement.objects.create(name='ACQUAINTANCE')
 
     def setUp(self):
         self.factory = APIRequestFactory()

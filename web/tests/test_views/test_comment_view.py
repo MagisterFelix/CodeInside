@@ -1,8 +1,8 @@
 from django.test import TestCase
 from rest_framework.test import APIRequestFactory, force_authenticate
 
-from web.models import User, Topic, Task, Comment
-from web.views import CommentView
+from web.models import User, Topic, Task, Comment, Achievement
+from web.views.comment_view import CommentView
 
 
 class CommentViewTest(TestCase):
@@ -24,6 +24,8 @@ class CommentViewTest(TestCase):
         Task.objects.create(name='stat_task', desc='', complexity=0, topic=topic, input='', output='', solution='')
         task = Task.objects.get(id=1)
         Comment.objects.create(user=user, task=task, message='static_msg')
+        Achievement.objects.create(name='ACQUAINTANCE')
+        Achievement.objects.create(name='COMMENTATOR')
 
     def setUp(self):
         self.factory = APIRequestFactory()

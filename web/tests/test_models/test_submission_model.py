@@ -47,12 +47,12 @@ class SubmissionModelTest(TestCase):
     def test_time_max_length(self):
         s = Submission.objects.get(id=1)
         max_length = s._meta.get_field('time').max_length
-        self.assertEquals(max_length, 4)
+        self.assertEquals(max_length, 9)
 
     def test_memory_max_length(self):
         s = Submission.objects.get(id=1)
         max_length = s._meta.get_field('memory').max_length
-        self.assertEquals(max_length, 3)
+        self.assertEquals(max_length, 8)
 
     def test_datetime_type_is_datetime(self):
         s = Submission.objects.get(id=1)
