@@ -88,7 +88,7 @@ class SubmissionViewTest(TestCase):
         task = Task.objects.get(id=2)
         request = self.factory.post(path='submission',
                                     data={'task': task.name, 'language': 'Python',
-                                          'code': 'n = input()\nprint(n)'},
+                                          'code': 'n = input()\nfor _ in range(10**8):\n\tpass\nprint(n)'},
                                     format='json')
         force_authenticate(request, user=self.admin)
         response = SubmissionView().as_view()(request)

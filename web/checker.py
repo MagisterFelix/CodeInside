@@ -1,5 +1,6 @@
 import os
 import subprocess
+from threading import Timer
 from concurrent.futures import ThreadPoolExecutor
 from functools import wraps
 
@@ -8,7 +9,7 @@ def threadpool(f, executor=None):
 
     @wraps(f)
     def wrap(*args, **kwargs):
-        return (executor or ThreadPoolExecutor()).submit(f, *args, **kwargs)
+        return (executor or ThreadPoolExecutor()).submit(f, *args, **kwargs).result()
 
     return wrap
 
@@ -37,17 +38,22 @@ class Checker:
         self._error = None
 
     @threadpool
-    def run(self, command, test=''):
+    def run(self, command, test=subprocess.DEVNULL):
         proc = subprocess.Popen(command,
                                 stdin=open(f'input_{self.user.id}.txt', 'r'),
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE,
                                 text=True,
                                 shell=True)
-        info = os.wait4(proc.pid, 0)[2]
-        time = info.ru_stime * 1000.0
-        memory = info.ru_maxrss / 1024.0
-        self._output, self._error = (b_string.strip() for b_string in proc.communicate(input=test, timeout=5.0))
+        timer = Timer(self.task.complexity + 0.1, proc.kill)
+        try:
+            timer.start()
+            info = os.wait4(proc.pid, 0)[2]
+            time = info.ru_utime * 1000.0
+            memory = info.ru_maxrss / 1024.0
+            self._output, self._error = (b_string.strip() for b_string in proc.communicate(input=test, timeout=5.0))
+        finally:
+            timer.cancel()
         proc.kill()
         return (float(f'{(time):.2f}'), float(f'{memory:.2f}'))
 
@@ -71,31 +77,32 @@ class Checker:
             file.write(self._code)
 
         try:
+
             if self.language == 'Python':
                 cmd = f'python {file_name}'
-                self.run(cmd, input[0]).result()
+                self.run(cmd, input[0])
 
             if self.language == 'C++':
                 cmd = f'./test_{self.user.id}.out'
-                self.run(f'g++ {file_name} -o {cmd[2:]}').result()
+                self.run(f'g++ {file_name} -o {cmd[2:]}')
                 subprocess.run(f'rm {file_name}', shell=True)
                 file_name = f'test_{self.user.id}.out'
 
             if self.language == 'C#':
                 cmd = f'mono test_{self.user.id}.out'
-                self.run(f'mcs -out:{file_name[:-3]}.out {file_name}').result()
+                self.run(f'mcs -out:{file_name[:-3]}.out {file_name}')
                 subprocess.run(f'rm {file_name}', shell=True)
                 file_name = f'test_{self.user.id}.out'
 
             if self.language == 'Java':
                 cmd = f'java {file_name[:-5]}'
-                self.run(f'javac {file_name}').result()
+                self.run(f'javac {file_name}')
                 subprocess.run(f'rm {file_name}', shell=True)
                 file_name = f'{file_name[:-5]}.class'
 
             if self.language == 'JavaScript':
                 cmd = f'node {file_name}'
-                self.run(cmd, input[0]).result()
+                self.run(cmd, input[0])
 
             if len(self._error) and self._error.find('JAVA_TOOL_OPTIONS') == -1:
                 self._status = 'System failure'
@@ -107,7 +114,7 @@ class Checker:
                 with open(f'input_{self.user.id}.txt', 'w') as file:
                     file.write(test)
 
-                current_time, current_memory = self.run(cmd, test).result()
+                current_time, current_memory = self.run(cmd, test)
 
                 self._time = f'{current_time} ms'
                 self._memory = f'{current_memory} MB'
