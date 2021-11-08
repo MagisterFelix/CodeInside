@@ -1,6 +1,16 @@
+import os
 import subprocess
-from time import perf_counter
-from memory_profiler import memory_usage
+from concurrent.futures import ThreadPoolExecutor
+from functools import wraps
+
+
+def threadpool(f, executor=None):
+
+    @wraps(f)
+    def wrap(*args, **kwargs):
+        return (executor or ThreadPoolExecutor()).submit(f, *args, **kwargs)
+
+    return wrap
 
 
 class Checker:
@@ -16,29 +26,30 @@ class Checker:
         self._memory = 'N/A'
         self._max_time = self.task.complexity * 1000
         self._max_memory = 128
-        self._params = {
-            'Python': ('.py', 3.0),
-            'C++': ('.cpp', 15.0),
-            'C#': ('.cs', 5.0),
-            'Java': ('.java', 1.25),
-            'JavaScript': ('.js', 2.0)
+        self._ext = {
+            'Python': '.py',
+            'C++': '.cpp',
+            'C#': '.cs',
+            'Java': '.java',
+            'JavaScript': '.js'
         }
         self._output = None
         self._error = None
 
+    @threadpool
     def run(self, command, test=''):
-        start_time = perf_counter()
         proc = subprocess.Popen(command,
                                 stdin=open(f'input_{self.user.id}.txt', 'r'),
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE,
                                 text=True,
                                 shell=True)
-        memory = sum(memory_usage(proc=proc, timeout=5.0)) + 0.1
+        info = os.wait4(proc.pid, 0)[2]
+        time = info.ru_stime * 1000.0
+        memory = info.ru_maxrss / 1024.0
         self._output, self._error = (b_string.strip() for b_string in proc.communicate(input=test, timeout=5.0))
-        finish_time = ((perf_counter() - start_time) * 1000) / self._params[self.language][1]
         proc.kill()
-        return (float(f'{(finish_time):.2f}'), float(f'{memory:.2f}'))
+        return (float(f'{(time):.2f}'), float(f'{memory:.2f}'))
 
     def check(self):
         input = self.task.input.split('\r\n\r\n')
@@ -54,7 +65,7 @@ class Checker:
         if self.language == 'Java':
             self._code = self._code.replace('public class Main', f'class test_{self.user.id}')
 
-        file_name = f'test_{self.user.id}' + self._params[self.language][0]
+        file_name = f'test_{self.user.id}' + self._ext[self.language]
 
         with open(file_name, 'w') as file:
             file.write(self._code)
@@ -62,29 +73,29 @@ class Checker:
         try:
             if self.language == 'Python':
                 cmd = f'python {file_name}'
-                self.run(cmd, input[0])
+                self.run(cmd, input[0]).result()
 
             if self.language == 'C++':
                 cmd = f'./test_{self.user.id}.out'
-                self.run(f'g++ {file_name} -o {cmd[2:]}')
+                self.run(f'g++ {file_name} -o {cmd[2:]}').result()
                 subprocess.run(f'rm {file_name}', shell=True)
                 file_name = f'test_{self.user.id}.out'
 
             if self.language == 'C#':
                 cmd = f'mono test_{self.user.id}.out'
-                self.run(f'mcs -out:{file_name[:-3]}.out {file_name}')
+                self.run(f'mcs -out:{file_name[:-3]}.out {file_name}').result()
                 subprocess.run(f'rm {file_name}', shell=True)
                 file_name = f'test_{self.user.id}.out'
 
             if self.language == 'Java':
                 cmd = f'java {file_name[:-5]}'
-                self.run(f'javac {file_name}')
+                self.run(f'javac {file_name}').result()
                 subprocess.run(f'rm {file_name}', shell=True)
                 file_name = f'{file_name[:-5]}.class'
 
             if self.language == 'JavaScript':
                 cmd = f'node {file_name}'
-                self.run(cmd, input[0])
+                self.run(cmd, input[0]).result()
 
             if len(self._error) and self._error.find('JAVA_TOOL_OPTIONS') == -1:
                 self._status = 'System failure'
@@ -96,7 +107,7 @@ class Checker:
                 with open(f'input_{self.user.id}.txt', 'w') as file:
                     file.write(test)
 
-                current_time, current_memory = self.run(cmd, test)
+                current_time, current_memory = self.run(cmd, test).result()
 
                 self._time = f'{current_time} ms'
                 self._memory = f'{current_memory} MB'
