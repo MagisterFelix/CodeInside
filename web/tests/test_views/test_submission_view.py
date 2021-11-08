@@ -88,7 +88,7 @@ class SubmissionViewTest(TestCase):
         task = Task.objects.get(id=2)
         request = self.factory.post(path='submission',
                                     data={'task': task.name, 'language': 'Python',
-                                          'code': 'n = input()\nprint(n)'},
+                                          'code': 'n = input()\nfor _ in range(10**8):\n\tpass\nprint(n)'},
                                     format='json')
         force_authenticate(request, user=self.admin)
         response = SubmissionView().as_view()(request)
@@ -106,15 +106,7 @@ class SubmissionViewTest(TestCase):
         request = self.factory.post(path='submission',
                                     data={'task': self.task.name, 'language': 'Python',
                                           'code': 'n = input()\n'
-                                          'a1=[10**8] * 10 ** 7\n'
-                                          'a2=[10**8] * 10 ** 7\n'
-                                          'a3=[10**8] * 10 ** 7\n'
-                                          'a4=[10**8] * 10 ** 7\n'
-                                          'a5=[10**8] * 10 ** 7\n'
-                                          'a6=[10**8] * 10 ** 7\n'
-                                          'a7=[10**8] * 10 ** 7\n'
-                                          'a8=[10**8] * 10 ** 7\n'
-                                          'a9=[10**8] * 10 ** 7\n'
+                                          'a1=[10**8] * 10 ** 8\n'
                                           'print(n)'},
                                     format='json')
         force_authenticate(request, user=self.admin)
