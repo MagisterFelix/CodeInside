@@ -4,7 +4,6 @@ from rest_framework.test import APIRequestFactory
 
 from web.models import User, Achievement
 from web.views.auth_view import UserRegistrationView, UserLoginView, UserProfileView
-from web.tests import future
 
 
 class AuthViewTest(TestCase):
@@ -63,7 +62,6 @@ class AuthViewTest(TestCase):
                               'message': 'User does not exist.',
                               'token': None})
 
-    @future
     def test_profile_with_token(self):
         email = 'default@gmail.com'
         request = self.factory.post(path='signIn',
@@ -93,7 +91,6 @@ class AuthViewTest(TestCase):
         self.assertDictEqual(response.data,
                              {'detail': ErrorDetail(string='Error decoding signature.', code='authentication_failed')})
 
-    @future
     def test_user_update_image(self):
         email = 'default@gmail.com'
         request = self.factory.post(path='signIn',
@@ -114,7 +111,6 @@ class AuthViewTest(TestCase):
         u = User.objects.get(id=1)
         self.assertListEqual([u.image], ['https://i.imgur.com/eK7OfDL.png'])
 
-    @future
     def test_user_update_password(self):
         email = 'default@gmail.com'
         request = self.factory.post(path='signIn',
@@ -132,7 +128,6 @@ class AuthViewTest(TestCase):
         self.assertDictEqual(response.data,
                              {'success': True, 'status code': 200, 'message': 'User password updated successfully.'})
 
-    @future
     def test_user_update_fields(self):
         email = 'default@gmail.com'
         request = self.factory.post(path='signIn',

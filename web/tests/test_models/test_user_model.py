@@ -2,7 +2,6 @@ from django.db.utils import IntegrityError
 from django.test import TestCase
 
 from web.models import Achievement, User
-from web.tests import future
 
 
 class UserModelTest(TestCase):
@@ -45,14 +44,12 @@ class UserModelTest(TestCase):
         u = User.objects.get(email="blank@gmail.com")
         self.assertIsNone(u.birthday)
 
-    @future
     def test_image_blank(self):
         User.objects.create(email="blank@gmail.com", password="0kL2jD1f4",
                             name="Blank", birthday="2000-12-13", image="")
         u = User.objects.get(email="blank@gmail.com")
         self.assertIsInstance(u.image, str)
 
-    @future
     def test_image_max_length(self):
         u = User.objects.get(id=1)
         max_length = u._meta.get_field('image').max_length
