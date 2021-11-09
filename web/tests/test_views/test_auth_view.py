@@ -79,7 +79,7 @@ class AuthViewTest(TestCase):
         token_response = UserProfileView.as_view()(token_request)
         self.assertDictEqual(token_response.data,
                              {'success': True, 'status code': 200, 'message': 'User profile received successfully.',
-                              'data': {'name': 'User', 'role': 'User', 'image': "https://i.imgur.com/JGmoHaP.jpeg",
+                              'data': {'name': 'User', 'role': 'User', 'image': 'https://i.imgur.com/V4RclNb.png',
                                        'banned': False, 'premium': False, 'birthday': '12/13/2000', 'time_zone': 'UTC'}
                               })
 
@@ -124,7 +124,7 @@ class AuthViewTest(TestCase):
         response = UserLoginView.as_view()(request)
         token = response.data['token']
         request = self.factory.put(path='profile',
-                                   data={'new_password': 'new_password'},
+                                   data={'password': 'new_password'},
                                    format='json',
                                    HTTP_AUTHORIZATION=f'Bearer {token}', )
 
@@ -152,7 +152,7 @@ class AuthViewTest(TestCase):
                              {'success': True, 'status code': 200, 'message': 'User updated successfully.'})
 
         u = User.objects.get(id=1)
-        self.assertListEqual([u.email, u.name, u.birthday],
+        self.assertListEqual([u.email, u.name, '{:%m/%d/%Y}'.format(u.birthday)],
                              ['new_email@gmail.com', 'New_User_Name', '09/09/2001'])
 
     def test_login_if_user_banned(self):
