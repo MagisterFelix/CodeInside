@@ -50,7 +50,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_superuser = models.BooleanField(default=False, verbose_name='Admin')
 
     name = models.CharField(max_length=40, blank=True)
-    premium = models.BooleanField(default=False)
+    image = models.CharField(max_length=100, default='https://i.imgur.com/V4RclNb.png', blank=True)
+    premium = models.CharField(max_length=200, blank=True)
     birthday = models.DateField(blank=True, null=True)
     achievement = models.ManyToManyField(Achievement, blank=True)
     time_zone = models.CharField(max_length=32, default='UTC')
