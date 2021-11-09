@@ -1,5 +1,6 @@
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import update_last_login
+from django.contrib.auth.password_validation import validate_password
 
 from rest_framework import serializers
 from rest_framework_jwt.settings import api_settings
@@ -53,6 +54,29 @@ class UserLoginSerializer(serializers.Serializer):
         }
 
         return response
+
+
+class ProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = (
+            'email', 'name', 'image', 'birthday', 'password'
+        )
+        extra_kwargs = {"email": {"required": False}, "password": {"required": False}}
+
+    def validate_password(self, value):
+        validate_password(value)
+        return value
+
+    def update(self, user, validated_data):
+        user.email = validated_data.get('email', user.email)
+        user.name = validated_data.get('name', user.name)
+        user.image = validated_data.get('image', user.image)
+        user.birthday = validated_data.get('birthday', user.birthday)
+        if validated_data.get('password'):
+            user.set_password(validated_data['password'])
+        user.save()
+        return user
 
 
 class TopicSerializer(serializers.ModelSerializer):

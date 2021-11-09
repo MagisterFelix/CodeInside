@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 
 from web.permissions import permissions
-from web.serializers import UserRegistrationSerializer, UserLoginSerializer
+from web.serializers import UserRegistrationSerializer, UserLoginSerializer, ProfileSerializer
 from web.models import User, Achievement
 
 
@@ -103,12 +103,14 @@ class UserLoginView(APIView):
 
 
 class UserProfileView(APIView):
+    serializer_class = ProfileSerializer
     permission_classes = (permissions.IsAuthenticated,)
     authentication_class = JSONWebTokenAuthentication
 
     def get(self, request):
         user = User.objects.get(email=request.user)
         role = 'Admin' if user.is_superuser else 'Moderator' if user.is_staff else 'User'
+        premium = bool(user.premium)
         banned = not user.is_active
         birthday = user.birthday.strftime(
             r'%m/%d/%Y') if user.birthday else None
@@ -119,8 +121,9 @@ class UserProfileView(APIView):
         data = {
             'name': user.name,
             'role': role,
+            'image': user.image,
             'banned': banned,
-            'premium': user.premium,
+            'premium': premium,
             'birthday': birthday,
             'time_zone': user.time_zone
         }
@@ -130,6 +133,40 @@ class UserProfileView(APIView):
             'status code': status_code,
             'message': message,
             'data': data
+        }
+
+        return Response(response, status=status_code)
+
+    def put(self, request):
+        user = User.objects.get(email=request.user)
+
+        if request.data.get('birthday') is not None:
+            month, day, year = request.data['birthday'].split('/')
+            request.data['birthday'] = f'{year}-{month}-{day}'
+
+        serializer = self.serializer_class(user, data=request.data)
+
+        if serializer.is_valid():
+            serializer.save()
+            success = True
+            status_code = status.HTTP_200_OK
+            if request.data.get('password'):
+                message = 'User password updated successfully.'
+            elif request.data.get('image'):
+                message = 'User image updated successfully.'
+            else:
+                message = 'User updated successfully.'
+        else:
+            success = False
+            message = ''
+            for value in serializer.errors.values():
+                message += value[0][:-1].capitalize() + '.'
+            status_code = status.HTTP_400_BAD_REQUEST
+
+        response = {
+            'success': success,
+            'status code': status_code,
+            'message': message
         }
 
         return Response(response, status=status_code)
