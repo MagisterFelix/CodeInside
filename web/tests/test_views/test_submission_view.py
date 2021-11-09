@@ -88,7 +88,7 @@ class SubmissionViewTest(TestCase):
         task = Task.objects.get(id=2)
         request = self.factory.post(path='submission',
                                     data={'task': task.name, 'language': 'Python',
-                                          'code': 'n = input()\nfor _ in range(10**8):\n\tpass\nprint(n)'},
+                                          'code': 'n = input()\nfor _ in range(10 ** 9):\n\tpass\nprint(n)'},
                                     format='json')
         force_authenticate(request, user=self.admin)
         response = SubmissionView().as_view()(request)
@@ -111,8 +111,6 @@ class SubmissionViewTest(TestCase):
                                     format='json')
         force_authenticate(request, user=self.admin)
         response = SubmissionView().as_view()(request)
-        if response.data['data']['memory'] != 'N/A' and float(response.data['data']['memory'][:-2]) > 3.0:
-            response.data['data']['status'] = 'Memory limit exceeded'
         self.assertEqual(response.data['data'].get('status'), 'Memory limit exceeded')
         response.data.pop('data')
         self.assertDictEqual(response.data,

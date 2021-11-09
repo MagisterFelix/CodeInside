@@ -4,6 +4,7 @@ from rest_framework.test import APIRequestFactory
 
 from web.models import User, Achievement
 from web.views.auth_view import UserRegistrationView, UserLoginView, UserProfileView
+from web.tests import future
 
 
 class AuthViewTest(TestCase):
@@ -62,7 +63,8 @@ class AuthViewTest(TestCase):
                               'message': 'User does not exist.',
                               'token': None})
 
-    def test_login_with_token(self):
+    @future
+    def test_profile_with_token(self):
         email = 'default@gmail.com'
         request = self.factory.post(path='signIn',
                                     data={'email': email,
@@ -77,10 +79,11 @@ class AuthViewTest(TestCase):
         token_response = UserProfileView.as_view()(token_request)
         self.assertDictEqual(token_response.data,
                              {'success': True, 'status code': 200, 'message': 'User profile received successfully.',
-                              'data': {'name': 'User', 'role': 'User', 'banned': False, 'premium': False,
-                                       'birthday': '12/13/2000', 'time_zone': 'UTC', }})
+                              'data': {'name': 'User', 'role': 'User', 'image': "https://i.imgur.com/JGmoHaP.jpeg",
+                                       'banned': False, 'premium': False, 'birthday': '12/13/2000', 'time_zone': 'UTC'}
+                              })
 
-    def test_login_with_wrong_token(self):
+    def test_profile_with_wrong_token(self):
         wrong_token = "0" * 200
         request = self.factory.get(path='profile',
                                    format='json',
@@ -89,6 +92,68 @@ class AuthViewTest(TestCase):
         response = UserProfileView.as_view()(request)
         self.assertDictEqual(response.data,
                              {'detail': ErrorDetail(string='Error decoding signature.', code='authentication_failed')})
+
+    @future
+    def test_user_update_image(self):
+        email = 'default@gmail.com'
+        request = self.factory.post(path='signIn',
+                                    data={'email': email,
+                                          'password': self.strong_password, }, format='json')
+
+        response = UserLoginView.as_view()(request)
+        token = response.data['token']
+        request = self.factory.put(path='profile',
+                                   data={'image': 'https://i.imgur.com/eK7OfDL.png', },
+                                   format='json',
+                                   HTTP_AUTHORIZATION=f'Bearer {token}', )
+
+        response = UserProfileView.as_view()(request)
+        self.assertDictEqual(response.data,
+                             {'success': True, 'status code': 200, 'message': 'User image updated successfully.'})
+
+        u = User.objects.get(id=1)
+        self.assertListEqual([u.image], ['https://i.imgur.com/eK7OfDL.png'])
+
+    @future
+    def test_user_update_password(self):
+        email = 'default@gmail.com'
+        request = self.factory.post(path='signIn',
+                                    data={'email': email,
+                                          'password': self.strong_password, }, format='json')
+
+        response = UserLoginView.as_view()(request)
+        token = response.data['token']
+        request = self.factory.put(path='profile',
+                                   data={'new_password': 'new_password'},
+                                   format='json',
+                                   HTTP_AUTHORIZATION=f'Bearer {token}', )
+
+        response = UserProfileView.as_view()(request)
+        self.assertDictEqual(response.data,
+                             {'success': True, 'status code': 200, 'message': 'User password updated successfully.'})
+
+    @future
+    def test_user_update_fields(self):
+        email = 'default@gmail.com'
+        request = self.factory.post(path='signIn',
+                                    data={'email': email,
+                                          'password': self.strong_password, }, format='json')
+
+        response = UserLoginView.as_view()(request)
+        token = response.data['token']
+        request = self.factory.put(path='profile',
+                                   data={'email': 'new_email@gmail.com',
+                                         'name': 'New_User_Name', 'birthday': '09/09/2001'},
+                                   format='json',
+                                   HTTP_AUTHORIZATION=f'Bearer {token}', )
+
+        response = UserProfileView.as_view()(request)
+        self.assertDictEqual(response.data,
+                             {'success': True, 'status code': 200, 'message': 'User updated successfully.'})
+
+        u = User.objects.get(id=1)
+        self.assertListEqual([u.email, u.name, u.birthday],
+                             ['new_email@gmail.com', 'New_User_Name', '09/09/2001'])
 
     def test_login_if_user_banned(self):
         u = User.objects.get(id=1)
@@ -104,7 +169,7 @@ class AuthViewTest(TestCase):
                              [False, 403, 'User has been blocked.'])
         self.assertEquals(response.data['token'], None)
 
-    def test_login_with_token_if_user_banned(self):
+    def test_profile_with_token_if_user_banned(self):
         email = 'default@gmail.com'
         request = self.factory.post(path='signIn',
                                     data={'email': email,
