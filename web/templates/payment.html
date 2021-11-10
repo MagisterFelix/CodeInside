@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeInside</title>
+    <link rel="icon" href="https://iconarchive.com/download/i97958/thehoth/seo/seo-web-code.ico" type="image/x-icon">
+    <script src="https://js.stripe.com/v3/"></script>
+    <script>
+        const stripe = Stripe("{{ STRIPE_PUBLISHABLE_KEY }}");
+        stripe.redirectToCheckout({sessionId: "{{ sessionId }}"})
+    </script>
+</head>
+</html>

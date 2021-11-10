@@ -144,7 +144,6 @@ CORS_ALLOWED_ORIGINS = [
     'http://127.0.0.1:8000'
 ]
 
-
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 MEDIA_URL = '/media/'
@@ -156,3 +155,7 @@ STATIC_URL = '/static/'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+STRIPE_PUBLISHABLE_KEY = os.environ.get('STRIPE_PUBLISHABLE_KEY')
+
+STRIPE_SECRET_KEY = os.environ.get('STRIPE_SECRET_KEY')
