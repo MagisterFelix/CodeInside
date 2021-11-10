@@ -1,12 +1,13 @@
 from django.conf.urls import url
 
-from web.views.base_view import BaseView
-from web.views.auth_view import UserRegistrationView, UserLoginView, UserProfileView
-from web.views.topic_view import TopicView
-from web.views.task_view import TaskView
-from web.views.comment_view import CommentView
-from web.views.submission_view import SubmissionView
 from web.views.achievement_view import AchievementView
+from web.views.auth_view import UserRegistrationView, UserLoginView, UserProfileView
+from web.views.base_view import BaseView
+from web.views.comment_view import CommentView
+from web.views.payment_view import PaymentView, PostPaymentView
+from web.views.submission_view import SubmissionView
+from web.views.task_view import TaskView
+from web.views.topic_view import TopicView
 
 urlpatterns = [
     url(r'^$', BaseView.as_view()),
@@ -22,4 +23,6 @@ urlpatterns = [
     url(r'^submissions/?$', SubmissionView.as_view()),
     url(r'^submissions/(?P<primary_key>\d+)/?$', SubmissionView.as_view()),
     url(r'^achievements/?$', AchievementView.as_view()),
+    url(r'^payment/(?P<primary_key>\d+)/?$', PaymentView.as_view()),
+    url(r'^postpayment/(?P<email>[\w.@-]+)/(?P<session_id>[\w.-]+)?$', PostPaymentView.as_view()),
 ]
