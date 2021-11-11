@@ -8,23 +8,27 @@ from web.permissions import permissions
 from web.serializers import UserRegistrationSerializer, UserLoginSerializer, ProfileSerializer
 
 
+LOGIN_FAILS = {
+    'email': 'User must have an email.',
+    'password': 'User must have a password.'
+}
+REGISTRATION_FAILS = {
+    **LOGIN_FAILS,
+    'time_zone': 'Time zone is required.'
+}
+
+
 class UserRegistrationView(APIView):
     serializer_class = UserRegistrationSerializer
     permission_classes = (permissions.AllowAny,)
 
     def post(self, request):
-        if request.data.get('email') is None:
-            success = False
-            status_code = status.HTTP_400_BAD_REQUEST
-            message = 'User must have an email.'
-        elif request.data.get('password') is None:
-            success = False
-            status_code = status.HTTP_400_BAD_REQUEST
-            message = 'User must have a password.'
-        elif request.data.get('time_zone') is None:
-            success = False
-            status_code = status.HTTP_400_BAD_REQUEST
-            message = 'Time zone is required.'
+        for key, value in REGISTRATION_FAILS.items():
+            if request.data.get(key) is None:
+                success = False
+                status_code = status.HTTP_400_BAD_REQUEST
+                message = value
+                break
         else:
             if request.data.get('birthday') is not None:
                 month, day, year = request.data['birthday'].split('/')
@@ -58,16 +62,13 @@ class UserLoginView(APIView):
     permission_classes = (permissions.AllowAny,)
 
     def post(self, request):
-        if request.data.get('email') is None:
-            success = False
-            status_code = status.HTTP_400_BAD_REQUEST
-            message = 'User must have an email.'
-            token = None
-        elif request.data.get('password') is None:
-            success = False
-            status_code = status.HTTP_400_BAD_REQUEST
-            message = 'User must have a password.'
-            token = None
+        for key, value in LOGIN_FAILS.items():
+            if request.data.get(key) is None:
+                success = False
+                status_code = status.HTTP_400_BAD_REQUEST
+                message = value
+                token = None
+                break
         else:
             serializer = self.serializer_class(data=request.data)
 
@@ -150,12 +151,10 @@ class UserProfileView(APIView):
             serializer.save()
             success = True
             status_code = status.HTTP_200_OK
-            if request.data.get('password'):
-                message = 'User password updated successfully.'
-            elif request.data.get('image'):
-                message = 'User image updated successfully.'
-            else:
-                message = 'User updated successfully.'
+            message = 'User updated successfully.'
+            for key in ('password', 'image'):
+                if request.data.get(key):
+                    message = f'User {key} updated successfully.'
         else:
             success = False
             message = ''
