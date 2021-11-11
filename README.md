@@ -36,18 +36,25 @@ git clone https://github.com/MagisterFelix/CodeInside.git
 ```
 cd CodeInside
 ```
-3. Install requirements
+3. Activate virtual environment
+```
+python -m venv venv
+```
+```
+source venv/bin/activate
+```
+4. Install requirements
 ```
 pip install -r requirements.txt
 ```
-4. Make migrations
+5. Make migrations
 ```
 python manage.py makemigrations
 ```
 ```
 python manage.py migrate
 ```
-5. Run server to make sure everything is fine
+6. Run server to make sure everything is fine
 ```
 python manage.py runserver
 ```
