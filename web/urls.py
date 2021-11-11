@@ -24,5 +24,5 @@ urlpatterns = [
     url(r'^submissions/(?P<primary_key>\d+)/?$', SubmissionView.as_view()),
     url(r'^achievements/?$', AchievementView.as_view()),
     url(r'^payment/(?P<primary_key>\d+)/?$', PaymentView.as_view()),
-    url(r'^postpayment/(?P<email>[\w.@-]+)/(?P<session_id>[\w.-]+)?$', PostPaymentView.as_view()),
+    url(r'^postpayment/(?P<email>[\w.@-]+)/(?P<session_id>[\w.-]+)/?$', PostPaymentView.as_view()),
 ]
