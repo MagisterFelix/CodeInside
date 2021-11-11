@@ -118,8 +118,8 @@ class SubmissionSerializer(serializers.ModelSerializer):
         )
 
     def create(self, validated_data):
-        statuses = dict((value, key) for key, value in Submission._meta.get_field('status').choices)
-        languages = dict((value, key) for key, value in Submission._meta.get_field('language').choices)
+        statuses = dict((value, key) for key, value in Submission.STATUSES)
+        languages = dict((value, key) for key, value in Submission.LANGUAGES)
         validated_data['status'] = statuses.get(validated_data['status'])
         validated_data['language'] = languages.get(validated_data['language'])
         submission = Submission.objects.create(**validated_data)
