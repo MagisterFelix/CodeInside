@@ -97,6 +97,8 @@ class Checker:
             self._code = self._code.replace('public class Main', f'class test_{self.user.id}')
 
         pre_file = file_name + lang['ext']
+        exec_file = lang['exec_file']
+
         with open(pre_file, 'w') as file:
             file.write(self._code)
 
@@ -112,8 +114,6 @@ class Checker:
                 self._message = self._error
                 subprocess.run(f'rm {pre_file}', shell=True)
                 return None
-
-            exec_file = lang['exec_file']
 
             for test in tests:
                 with open(f'input_{self.user.id}.txt', 'w') as file:
