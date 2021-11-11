@@ -17,14 +17,14 @@ class PaymentView(APIView):
     template_name = 'payment.html'
 
     def get(self, request, primary_key=None):
-        profile_link = 'http://localhost:4200/profile'
+        profile_link = 'https://codeinside-web.herokuapp.com/profile'
         if primary_key and User.objects.filter(id=primary_key).exists():
             user = User.objects.get(id=primary_key)
             discount = user.achievement.aggregate(Sum('discount'))['discount__sum']
 
             stripe.api_key = settings.STRIPE_SECRET_KEY
             checkout_session = stripe.checkout.Session.create(
-                success_url=f"http://127.0.0.1:8000/postpayment/{user.email}/" + "{CHECKOUT_SESSION_ID}",
+                success_url=f"https://codeinside.herokuapp.com/postpayment/{user.email}/" + "{CHECKOUT_SESSION_ID}",
                 cancel_url=profile_link,
                 payment_method_types=['card'],
                 mode='payment',
@@ -60,4 +60,4 @@ class PostPaymentView(APIView):
                         user.save()
                 except InvalidRequestError:
                     pass
-        return redirect('http://localhost:4200/profile')
+        return redirect('https://codeinside-web.herokuapp.com/profile')
