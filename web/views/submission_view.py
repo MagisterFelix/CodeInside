@@ -1,13 +1,13 @@
 from rest_framework import status
-from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 
-from web.utility import WithChoices, convert_datetime
+from web.checker import Checker
+from web.models import Submission, Task, Achievement
 from web.permissions import permissions
 from web.serializers import SubmissionSerializer
-from web.models import Submission, Task, Achievement
-from web.checker import Checker
+from web.utility import WithChoices, convert_datetime
 
 
 class SubmissionView(APIView):
@@ -81,35 +81,35 @@ class SubmissionView(APIView):
                     status_code = status.HTTP_201_CREATED
                     message = 'Submission created successfully.'
 
-                    u = request.user
-                    a = Achievement.objects.exclude(name__in=['ACQUAINTANCE', 'COMMENTATOR'])
-                    unique_solved = Submission.objects.filter(user=u, status=0).values('task').distinct()
+                    user = request.user
+                    submission_achievements = Achievement.objects.exclude(name__in=['ACQUAINTANCE', 'COMMENTATOR'])
+                    unique_solved = Submission.objects.filter(user=user, status=0).values('task').distinct()
                     complexity = [0] * 5
-                    for sbm in unique_solved:
-                        task_pk = sbm['task']
+                    for submission in unique_solved:
+                        task_pk = submission['task']
                         task = Task.objects.get(pk=task_pk)
                         complexity[task.complexity - 1] += 1
                     for idx, val in enumerate(['TRAINEE', 'JUNIOR', 'MIDDLE', 'SENIOR', 'TECHNICAL EXPERT']):
-                        if complexity[idx] > 0 and not u.achievement.filter(name=val).exists():
-                            u.achievement.add(a.get(name=val))
+                        if complexity[idx] > 0 and not user.achievement.filter(name=val).exists():
+                            user.achievement.add(submission_achievements.get(name=val))
                     for idx, val in enumerate(['YONGLING', 'PADAVAN', 'KNIGHT', 'MASTER', 'ELITE']):
-                        if complexity[idx] >= 3 and not u.achievement.filter(name=val).exists():
-                            u.achievement.add(a.get(name=val))
+                        if complexity[idx] >= 3 and not user.achievement.filter(name=val).exists():
+                            user.achievement.add(submission_achievements.get(name=val))
 
                     language_achievement = {'Python': 'PYTHON DEV',
                                             'C++': 'C++ DEV',
                                             'C#': 'C# DEV',
                                             'Java': 'JAVA DEV',
                                             'JavaScript': 'JAVASCRIPT DEV'}.get(request.data['language'])
-                    if data['status'] == 'Accepted' and not u.achievement.filter(name=language_achievement).exists():
-                        u.achievement.add(a.get(name=language_achievement))
+                    if data['status'] == 'Accepted' and not user.achievement.filter(name=language_achievement).exists():
+                        user.achievement.add(submission_achievements.get(name=language_achievement))
                     status_achievement = {
                         'Accepted': 'ACCEPTED',
                         'Wrong answer': 'WRONG ANSWER',
                         'Time limit exceeded': 'TIME LIMITED',
                     }.get(data['status'])
-                    if status_achievement and not u.achievement.filter(name=status_achievement).exists():
-                        u.achievement.add(a.get(name=status_achievement))
+                    if status_achievement and not user.achievement.filter(name=status_achievement).exists():
+                        user.achievement.add(submission_achievements.get(name=status_achievement))
 
                 else:
                     data = None

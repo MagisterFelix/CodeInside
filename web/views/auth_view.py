@@ -1,11 +1,11 @@
 from rest_framework import status
-from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 
+from web.models import User, Achievement
 from web.permissions import permissions
 from web.serializers import UserRegistrationSerializer, UserLoginSerializer, ProfileSerializer
-from web.models import User, Achievement
 
 
 class UserRegistrationView(APIView):
@@ -77,10 +77,10 @@ class UserLoginView(APIView):
                 message = 'User logged in successfully.'
                 token = serializer.data['token']
 
-                u = User.objects.get(email=request.data.get('email'))
-                a = Achievement.objects.get(name='ACQUAINTANCE')
-                if not u.achievement.filter(name='ACQUAINTANCE').exists():
-                    u.achievement.add(a)
+                user = User.objects.get(email=request.data.get('email'))
+                acquaintance_achievement = Achievement.objects.get(name='ACQUAINTANCE')
+                if not user.achievement.filter(name='ACQUAINTANCE').exists():
+                    user.achievement.add(acquaintance_achievement)
 
             else:
                 success = False

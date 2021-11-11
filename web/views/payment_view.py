@@ -5,6 +5,7 @@ from django.shortcuts import redirect
 from rest_framework.renderers import TemplateHTMLRenderer
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from stripe.error import InvalidRequestError
 
 from web.models import User
 from web.permissions import permissions
@@ -18,18 +19,18 @@ class PaymentView(APIView):
     def get(self, request, primary_key=None):
         profile_link = 'http://localhost:4200/profile'
         if primary_key and User.objects.filter(id=primary_key).exists():
-            u = User.objects.get(id=primary_key)
-            discount = u.achievement.aggregate(Sum('discount'))['discount__sum']
+            user = User.objects.get(id=primary_key)
+            discount = user.achievement.aggregate(Sum('discount'))['discount__sum']
 
             stripe.api_key = settings.STRIPE_SECRET_KEY
             checkout_session = stripe.checkout.Session.create(
-                success_url=f"http://127.0.0.1:8000/postpayment/{u.email}/" + "{CHECKOUT_SESSION_ID}",
+                success_url=f"http://127.0.0.1:8000/postpayment/{user.email}/" + "{CHECKOUT_SESSION_ID}",
                 cancel_url=profile_link,
                 payment_method_types=['card'],
                 mode='payment',
                 line_items=[
                     {
-                        'name': f'CodeInside Premium for {u.email}',
+                        'name': f'CodeInside Premium for {user.email}',
                         'quantity': 1,
                         'currency': 'usd',
                         'amount': f'{int(500 * (1 - discount / 100))}' if discount else '500',
@@ -49,14 +50,14 @@ class PostPaymentView(APIView):
     def get(self, request, email=None, session_id=None):
         if email and session_id and User.objects.filter(email=email).exists() and not User.objects.filter(
                 premium=session_id).exists():
-            u = User.objects.get(email=email)
-            if not u.premium:
+            user = User.objects.get(email=email)
+            if not user.premium:
                 stripe.api_key = settings.STRIPE_SECRET_KEY
                 try:
                     checkout = stripe.checkout.Session.retrieve(session_id)
                     if checkout['payment_status'] == 'paid':
-                        u.premium = session_id
-                        u.save()
-                except stripe.error.InvalidRequestError:
+                        user.premium = session_id
+                        user.save()
+                except InvalidRequestError:
                     pass
         return redirect('http://localhost:4200/profile')

@@ -108,8 +108,8 @@ class AuthViewTest(TestCase):
         self.assertDictEqual(response.data,
                              {'success': True, 'status code': 200, 'message': 'User image updated successfully.'})
 
-        u = User.objects.get(id=1)
-        self.assertListEqual([u.image], ['https://i.imgur.com/eK7OfDL.png'])
+        user = User.objects.get(id=1)
+        self.assertListEqual([user.image], ['https://i.imgur.com/eK7OfDL.png'])
 
     def test_user_update_password(self):
         email = 'default@gmail.com'
@@ -146,14 +146,14 @@ class AuthViewTest(TestCase):
         self.assertDictEqual(response.data,
                              {'success': True, 'status code': 200, 'message': 'User updated successfully.'})
 
-        u = User.objects.get(id=1)
-        self.assertListEqual([u.email, u.name, '{:%m/%d/%Y}'.format(u.birthday)],
+        user = User.objects.get(id=1)
+        self.assertListEqual([user.email, user.name, '{:%m/%d/%Y}'.format(user.birthday)],
                              ['new_email@gmail.com', 'New_User_Name', '09/09/2001'])
 
     def test_login_if_user_banned(self):
-        u = User.objects.get(id=1)
-        u.is_active = False
-        u.save()
+        user = User.objects.get(id=1)
+        user.is_active = False
+        user.save()
 
         request = self.factory.post(path='signIn',
                                     data={'email': 'default@gmail.com',
@@ -173,9 +173,9 @@ class AuthViewTest(TestCase):
         response = UserLoginView.as_view()(request)
         token = response.data['token']
 
-        u = User.objects.get(id=1)
-        u.is_active = False
-        u.save()
+        user = User.objects.get(id=1)
+        user.is_active = False
+        user.save()
 
         token_request = self.factory.get(path='profile',
                                          format='json',

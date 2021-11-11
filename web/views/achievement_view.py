@@ -3,9 +3,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 
+from web.models import Achievement
 from web.permissions import permissions
 from web.serializers import AchievementSerializer
-from web.models import Achievement
 
 
 class AchievementView(APIView):
@@ -14,17 +14,15 @@ class AchievementView(APIView):
     authentication_class = JSONWebTokenAuthentication
 
     def get(self, request):
-        u = self.request.user.achievement.values()
-        a = Achievement.objects.all()
+        user_achievements = self.request.user.achievement.values()
+        other_achievements = Achievement.objects.difference(user_achievements).values()
 
-        for i in u:
-            i['earned'] = True
-            a = a.exclude(name=i['name'])
-        a = a.values()
-        for i in a:
-            i['earned'] = False
+        for achievement in user_achievements:
+            achievement['earned'] = True
+        for achievement in other_achievements:
+            achievement['earned'] = False
 
-        data = list(u) + list(a)
+        data = list(user_achievements) + list(other_achievements)
         success = True
         status_code = status.HTTP_200_OK
         message = 'Achievements received successfully.'

@@ -1,15 +1,14 @@
 from rest_framework import status
-from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 
+from web.models import Task, Topic
 from web.permissions import permissions
 from web.serializers import TaskSerializer
-from web.models import Task, Topic
 
 
 class TaskView(APIView):
-
     serializer_class = TaskSerializer
     permission_classes = (permissions.IsAdminUserOrReadOnly,)
     authentication_class = JSONWebTokenAuthentication

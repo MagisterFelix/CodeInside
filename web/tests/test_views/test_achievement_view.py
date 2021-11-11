@@ -43,78 +43,78 @@ class AchievementViewTest(TestCase):
         self.topic = Topic.objects.get(id=1)
 
     def test_achievement_ACQUAINTANCE(self):
-        u = self.user
-        achievements_before = u.achievement.count()
+        user = self.user
+        achievements_before = user.achievement.count()
         request = self.factory.post(path='signIn',
                                     data={'email': 'default@gmail.com',
                                           'password': self.strong_password, }, format='json')
 
         UserLoginView.as_view()(request)
-        achievements_after = u.achievement.count()
+        achievements_after = user.achievement.count()
         self.assertGreater(achievements_after, achievements_before)
-        self.assertEquals(u.achievement.filter(name='ACQUAINTANCE').exists(), True)
+        self.assertEquals(user.achievement.filter(name='ACQUAINTANCE').exists(), True)
 
     def test_achievement_COMMENTATOR(self):
-        u = self.user
-        achievements_before = u.achievement.count()
+        user = self.user
+        achievements_before = user.achievement.count()
         request = self.factory.post(path='comments',
-                                    data={'task': '1xStars#0', 'user': u.name, 'message': 'msg'},
+                                    data={'task': '1xStars#0', 'user': user.name, 'message': 'msg'},
                                     format='json')
 
-        force_authenticate(request, user=u)
+        force_authenticate(request, user=user)
         CommentView.as_view()(request)
-        achievements_after = u.achievement.count()
+        achievements_after = user.achievement.count()
         self.assertGreater(achievements_after, achievements_before)
-        self.assertEquals(u.achievement.filter(name='COMMENTATOR').exists(), True)
+        self.assertEquals(user.achievement.filter(name='COMMENTATOR').exists(), True)
 
     def test_achievement_stars(self):
-        u = self.user
-        achievements_before = u.achievement.count()
+        user = self.user
+        achievements_before = user.achievement.count()
         for star in range(1, 6):
             request = self.factory.post(path='submissions',
                                         data={'task': f'{star}xStars#0', 'language': 'Python', 'code': 'print("bar")'},
                                         format='json')
-            force_authenticate(request, user=u)
+            force_authenticate(request, user=user)
             SubmissionView.as_view()(request)
-        achievements_after = u.achievement.count()
+        achievements_after = user.achievement.count()
         self.assertGreater(achievements_after, achievements_before)
         self.assertEquals(
-            u.achievement.filter(
+            user.achievement.filter(
                 name__in=['TRAINEE', 'JUNIOR', 'MIDDLE', 'SENIOR', 'TECHNICAL EXPERT', 'PYTHON DEV',
                           'ACCEPTED']).count(),
             achievements_after)
 
     def test_achievement_triplet(self):
-        u = self.user
-        achievements_before = u.achievement.count()
+        user = self.user
+        achievements_before = user.achievement.count()
         for num in range(3):
             for star in range(1, 6):
                 request = self.factory.post(path='submissions',
                                             data={'task': f'{star}xStars#{num}', 'language': 'Python',
                                                   'code': 'print("bar")'},
                                             format='json')
-                force_authenticate(request, user=u)
+                force_authenticate(request, user=user)
                 SubmissionView.as_view()(request)
-        achievements_after = u.achievement.count()
+        achievements_after = user.achievement.count()
         self.assertGreater(achievements_after, achievements_before)
         self.assertEquals(
-            u.achievement.filter(
+            user.achievement.filter(
                 name__in=['TRAINEE', 'JUNIOR', 'MIDDLE', 'SENIOR', 'TECHNICAL EXPERT', 'YONGLING', 'PADAVAN', 'KNIGHT',
                           'MASTER', 'ELITE', 'PYTHON DEV', 'ACCEPTED']).count(),
             achievements_after)
 
     def test_achievement_read(self):
-        u = self.user
+        user = self.user
         for num in range(3):
             request = self.factory.post(path='submissions',
                                         data={'task': f'1xStars#{num}', 'language': 'Python', 'code': 'print("bar")'},
                                         format='json')
-            force_authenticate(request, user=u)
+            force_authenticate(request, user=user)
             SubmissionView.as_view()(request)
 
         request = self.factory.get(path='achievements',
                                    format='json')
-        force_authenticate(request, user=u)
+        force_authenticate(request, user=user)
         response = AchievementView.as_view()(request)
         response.data.pop('data')
         self.assertDictEqual(response.data,

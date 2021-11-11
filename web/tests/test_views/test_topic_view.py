@@ -79,8 +79,8 @@ class TopicViewTest(TestCase):
         self.assertDictEqual(response.data,
                              {'success': True, 'status code': 200, 'message': 'Topic updated successfully.'})
 
-        t = Topic.objects.get(id=2)
-        self.assertListEqual([t.name, t.desc], ['New_Dynamic_Topic', 'New_Dynamic_Desc'])
+        topic = Topic.objects.get(id=2)
+        self.assertListEqual([topic.name, topic.desc], ['New_Dynamic_Topic', 'New_Dynamic_Desc'])
 
     def test_topic_update_if_not_exists(self):
         request = self.factory.put(path='topic',

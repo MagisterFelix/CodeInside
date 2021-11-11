@@ -87,11 +87,11 @@ class TaskViewTest(TestCase):
         self.assertDictEqual(response.data,
                              {'success': True, 'status code': 200, 'message': 'Task updated successfully.'})
 
-        t = Task.objects.get(id=2)
-        t_dict = t.__dict__
-        t_dict.pop('_state')
+        task = Task.objects.get(id=2)
+        task_dict = task.__dict__
+        task_dict.pop('_state')
 
-        self.assertDictEqual(t_dict,
+        self.assertDictEqual(task_dict,
                              {'id': 2, 'name': 'new', 'desc': 'new', 'complexity': 1, 'topic_id': 1, 'input': 'new',
                               'output': 'new', 'solution': 'new', })
 
