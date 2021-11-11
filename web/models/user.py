@@ -1,5 +1,5 @@
-from django.db import models
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser, PermissionsMixin
+from django.db import models
 
 from .achievement import Achievement
 
@@ -61,8 +61,8 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     objects = UserManager()
 
-    def __str__(self):
-        return self.email
-
     class Meta:
         db_table = "auth_user"
+
+    def __str__(self):
+        return self.email

@@ -1,4 +1,5 @@
 from django.db import models
+
 from .task import Task
 from .user import User
 
