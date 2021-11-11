@@ -141,7 +141,9 @@ USE_TZ = True
 
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:4200',
-    'http://127.0.0.1:8000'
+    'https://codeinside-web.herokuapp.com',
+    'http://127.0.0.1:8000',
+    'https://codeinside.herokuapp.com'
 ]
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
