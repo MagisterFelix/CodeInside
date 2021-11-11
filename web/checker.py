@@ -27,13 +27,6 @@ class Checker:
         self._memory = 'N/A'
         self._max_time = self.task.complexity * 1000
         self._max_memory = 128
-        self._ext = {
-            'Python': '.py',
-            'C++': '.cpp',
-            'C#': '.cs',
-            'Java': '.java',
-            'JavaScript': '.js'
-        }
         self._output = None
         self._error = None
 
@@ -55,12 +48,12 @@ class Checker:
         finally:
             timer.cancel()
         proc.kill()
-        return (float(f'{(time):.2f}'), float(f'{memory:.2f}'))
+        return (float(f'{time:.2f}'), float(f'{memory:.2f}'))
 
     def check(self):
-        input = self.task.input.split('\r\n\r\n')
+        tests = self.task.input.split('\r\n\r\n')
         with open(f'input_{self.user.id}.txt', 'w') as file:
-            file.write(input[0])
+            file.write(tests[0])
 
         expected_output = self.task.output.split('\r\n\r\n')
 
@@ -68,53 +61,65 @@ class Checker:
         memory = 0
         output = []
 
+        file_name = f'test_{self.user.id}'
+        lang = {
+            'Python': {
+                'ext': '.py',
+                'run': f'python {file_name}.py',
+                'exec_file': f'{file_name}.py'
+            },
+            'C++': {
+                'ext': '.cpp',
+                'compile': f'g++ {file_name}.cpp -o {file_name}.out',
+                'run': f'./{file_name}.out',
+                'exec_file': f'{file_name}.out'
+            },
+            'C#': {
+                'ext': '.cs',
+                'compile': f'mcs -out:{file_name}.out {file_name}.cs',
+                'run': f'mono {file_name}.out',
+                'exec_file': f'{file_name}.out'
+            },
+            'Java': {
+                'ext': '.java',
+                'compile': f'javac {file_name}.java',
+                'run': f'java {file_name}',
+                'exec_file': f'{file_name}.class'
+            },
+            'JavaScript': {
+                'ext': '.js',
+                'run': f'node {file_name}.js',
+                'exec_file': f'{file_name}.js'
+            }
+        }.get(self.language)
+
         if self.language == 'Java':
             self._code = self._code.replace('public class Main', f'class test_{self.user.id}')
 
-        file_name = f'test_{self.user.id}' + self._ext[self.language]
-
-        with open(file_name, 'w') as file:
+        pre_file = file_name + lang['ext']
+        with open(pre_file, 'w') as file:
             file.write(self._code)
 
         try:
-
-            if self.language == 'Python':
-                cmd = f'python {file_name}'
-                self.run(cmd, input[0])
-
-            if self.language == 'C++':
-                cmd = f'./test_{self.user.id}.out'
-                self.run(f'g++ {file_name} -o {cmd[2:]}')
-                subprocess.run(f'rm {file_name}', shell=True)
-                file_name = f'test_{self.user.id}.out'
-
-            if self.language == 'C#':
-                cmd = f'mono test_{self.user.id}.out'
-                self.run(f'mcs -out:{file_name[:-3]}.out {file_name}')
-                subprocess.run(f'rm {file_name}', shell=True)
-                file_name = f'test_{self.user.id}.out'
-
-            if self.language == 'Java':
-                cmd = f'java {file_name[:-5]}'
-                self.run(f'javac {file_name}')
-                subprocess.run(f'rm {file_name}', shell=True)
-                file_name = f'{file_name[:-5]}.class'
-
-            if self.language == 'JavaScript':
-                cmd = f'node {file_name}'
-                self.run(cmd, input[0])
+            if lang.get('compile'):
+                self.run(lang['compile'])
+                subprocess.run(f'rm {pre_file}', shell=True)
+            else:
+                self.run(lang['run'], tests[0])
 
             if len(self._error) and self._error.find('JAVA_TOOL_OPTIONS') == -1:
                 self._status = 'System failure'
                 self._message = self._error
-                subprocess.run(f'rm {file_name}', shell=True)
-                return
+                subprocess.run(f'rm {pre_file}', shell=True)
+                return None
 
-            for test in input:
+            exec_file = lang['exec_file']
+
+            for test in tests:
                 with open(f'input_{self.user.id}.txt', 'w') as file:
                     file.write(test)
 
-                current_time, current_memory = self.run(cmd, test)
+                current_time, current_memory = self.run(lang['run'], test)
 
                 self._time = f'{current_time} ms'
                 self._memory = f'{current_memory} MB'
@@ -144,7 +149,7 @@ class Checker:
             self._time = 'N/A'
             self._memory = 'N/A'
 
-        subprocess.run(f'rm {file_name} input_{self.user.id}.txt', shell=True)
+        subprocess.run(f'rm {exec_file} input_{self.user.id}.txt', shell=True)
 
     def get_data(self):
         data = {
