@@ -15,7 +15,7 @@ FUTURE_TESTS = False
 ALLOWED_HOSTS = ['127.0.0.1', 'codeinside.herokuapp.com']
 
 INSTALLED_APPS = [
-    'web',
+    'core.web',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -121,11 +121,11 @@ JWT_AUTH = {
     'JWT_AUTH_COOKIE': None,
 }
 
-DATE_FORMAT = (('m/d/Y'))
+DATE_FORMAT = (('m/d/Y'),)
 
 DATE_INPUT_FORMATS = (('%m/%d/%Y'),)
 
-DATETIME_FORMAT = (('m/d/Y H:i'))
+DATETIME_FORMAT = (('m/d/Y H:i'),)
 
 DATETIME_INPUT_FORMATS = (('%m/%d/%Y %H:%i'),)
 
@@ -141,7 +141,9 @@ USE_TZ = True
 
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:4200',
-    'http://127.0.0.1:8000'
+    'https://codeinside-web.herokuapp.com',
+    'http://127.0.0.1:8000',
+    'https://codeinside.herokuapp.com'
 ]
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
