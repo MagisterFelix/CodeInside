@@ -120,6 +120,8 @@ class UserProfileView(APIView):
         status_code = status.HTTP_200_OK
         message = 'User profile received successfully.'
         data = {
+            'id': user.id,
+            'email': user.email,
             'name': user.name,
             'role': role,
             'image': user.image,

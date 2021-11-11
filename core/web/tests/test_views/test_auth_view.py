@@ -77,8 +77,9 @@ class AuthViewTest(TestCase):
         token_response = UserProfileView.as_view()(token_request)
         self.assertDictEqual(token_response.data,
                              {'success': True, 'status code': 200, 'message': 'User profile received successfully.',
-                              'data': {'name': 'User', 'role': 'User', 'image': 'https://i.imgur.com/V4RclNb.png',
-                                       'banned': False, 'premium': False, 'birthday': '12/13/2000', 'time_zone': 'UTC'}
+                              'data': {'id': 1, 'email': 'default@gmail.com', 'name': 'User', 'role': 'User',
+                                       'image': 'https://i.imgur.com/V4RclNb.png', 'banned': False, 'premium': False,
+                                       'birthday': '12/13/2000', 'time_zone': 'UTC'}
                               })
 
     def test_profile_with_wrong_token(self):
