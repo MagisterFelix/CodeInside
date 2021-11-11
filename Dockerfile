@@ -30,6 +30,7 @@ USER codeinside
 
 # install dependencies
 COPY --chown=codeinside:codeinside ./requirements.txt .
+RUN pip install psycopg2
 RUN pip install -r requirements.txt
 
 # copy project
