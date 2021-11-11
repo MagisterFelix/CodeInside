@@ -1,8 +1,8 @@
 from django.test import TestCase
 from rest_framework.test import APIRequestFactory, force_authenticate
 
-from web.models import User, Topic, Task
-from web.views.task_view import TaskView
+from core.web.models import User, Topic, Task
+from core.web.views.task_view import TaskView
 
 
 class TaskViewTest(TestCase):

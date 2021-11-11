@@ -1,8 +1,8 @@
 from django.test import TestCase
 from rest_framework.test import APIRequestFactory, force_authenticate
 
-from web.models import User, Topic, Task, Submission, Achievement
-from web.views.submission_view import SubmissionView
+from core.web.models import User, Topic, Task, Submission, Achievement
+from core.web.views.submission_view import SubmissionView
 
 
 class SubmissionViewTest(TestCase):

@@ -1,13 +1,13 @@
 from django.conf.urls import url
 
-from web.views.achievement_view import AchievementView
-from web.views.auth_view import UserRegistrationView, UserLoginView, UserProfileView
-from web.views.base_view import BaseView
-from web.views.comment_view import CommentView
-from web.views.payment_view import PaymentView, PostPaymentView
-from web.views.submission_view import SubmissionView
-from web.views.task_view import TaskView
-from web.views.topic_view import TopicView
+from .views.achievement_view import AchievementView
+from .views.auth_view import UserRegistrationView, UserLoginView, UserProfileView
+from .views.base_view import BaseView
+from .views.comment_view import CommentView
+from .views.payment_view import PaymentView, PostPaymentView
+from .views.submission_view import SubmissionView
+from .views.task_view import TaskView
+from .views.topic_view import TopicView
 
 urlpatterns = [
     url(r'^$', BaseView.as_view()),

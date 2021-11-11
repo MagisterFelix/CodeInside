@@ -2,8 +2,8 @@ from django.test import TestCase
 from rest_framework.exceptions import ErrorDetail
 from rest_framework.test import APIRequestFactory
 
-from web.models import User, Achievement
-from web.views.auth_view import UserRegistrationView, UserLoginView, UserProfileView
+from core.web.models import User, Achievement
+from core.web.views.auth_view import UserRegistrationView, UserLoginView, UserProfileView
 
 
 class AuthViewTest(TestCase):

@@ -3,11 +3,11 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 
-from web.checker import Checker
-from web.models import Submission, Task, Achievement
-from web.permissions import permissions
-from web.serializers import SubmissionSerializer
-from web.utility import WithChoices, convert_datetime
+from core.web.checker import Checker
+from core.web.models import Submission, Task, Achievement
+from core.web.permissions import permissions
+from core.web.serializers import SubmissionSerializer
+from core.web.utility import WithChoices, convert_datetime
 
 
 class SubmissionView(APIView):

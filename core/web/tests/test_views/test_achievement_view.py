@@ -1,11 +1,11 @@
 from django.test import TestCase
 from rest_framework.test import APIRequestFactory, force_authenticate
 
-from web.models import Achievement, User, Task, Topic
-from web.views.achievement_view import AchievementView
-from web.views.auth_view import UserLoginView
-from web.views.comment_view import CommentView
-from web.views.submission_view import SubmissionView
+from core.web.models import Achievement, User, Task, Topic
+from core.web.views.achievement_view import AchievementView
+from core.web.views.auth_view import UserLoginView
+from core.web.views.comment_view import CommentView
+from core.web.views.submission_view import SubmissionView
 
 
 class AchievementViewTest(TestCase):

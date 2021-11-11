@@ -3,9 +3,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 
-from web.models import Topic
-from web.permissions import permissions
-from web.serializers import TopicSerializer
+from core.web.models import Topic
+from core.web.permissions import permissions
+from core.web.serializers import TopicSerializer
 
 
 class TopicView(APIView):

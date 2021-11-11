@@ -1,8 +1,8 @@
 from django.test import TestCase
 from rest_framework.test import APIRequestFactory, force_authenticate
 
-from web.models import User, Topic, Task, Comment, Achievement
-from web.views.comment_view import CommentView
+from core.web.models import User, Topic, Task, Comment, Achievement
+from core.web.views.comment_view import CommentView
 
 
 class CommentViewTest(TestCase):

@@ -7,8 +7,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from stripe.error import InvalidRequestError
 
-from web.models import User
-from web.permissions import permissions
+from core.web.models import User
+from core.web.permissions import permissions
 
 
 class PaymentView(APIView):

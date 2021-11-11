@@ -2,7 +2,7 @@ import datetime
 
 from django.test import TestCase
 
-from web.models import Submission, Task, Topic, User
+from core.web.models import Submission, Task, Topic, User
 
 
 class SubmissionModelTest(TestCase):

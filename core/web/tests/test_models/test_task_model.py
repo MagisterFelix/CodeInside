@@ -1,7 +1,7 @@
 from django.db.utils import IntegrityError
 from django.test import TestCase
 
-from web.models import Task, Topic
+from core.web.models import Task, Topic
 
 
 class TaskModelTest(TestCase):

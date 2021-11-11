@@ -3,10 +3,10 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 
-from web.models import Comment, Task, User, Achievement
-from web.permissions import permissions
-from web.serializers import CommentSerializer
-from web.utility import convert_datetime
+from core.web.models import Comment, Task, User, Achievement
+from core.web.permissions import permissions
+from core.web.serializers import CommentSerializer
+from core.web.utility import convert_datetime
 
 
 class CommentView(APIView):

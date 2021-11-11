@@ -1,7 +1,7 @@
 from django.db.utils import IntegrityError
 from django.test import TestCase
 
-from web.models import Achievement, User
+from core.web.models import Achievement, User
 
 
 class UserModelTest(TestCase):
