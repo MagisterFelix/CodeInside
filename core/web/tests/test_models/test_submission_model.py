@@ -3,6 +3,7 @@ import datetime
 from django.test import TestCase
 
 from core.web.models import Submission, Task, Topic, User
+from core.web.tests import STRONG_PASSWORD
 
 
 class SubmissionModelTest(TestCase):
@@ -12,7 +13,7 @@ class SubmissionModelTest(TestCase):
         Topic.objects.create(name="Topic", desc="D1")
         topic = Topic.objects.get(id=1)
         Task.objects.create(name="T1", desc="D1", complexity=0, topic=topic, input="in", output="out", solution="sol")
-        User.objects.create_user(email="user@gmail.com", password="Am23Jn2lA", name="User", birthday="2000-12-13")
+        User.objects.create_user(email="user@gmail.com", password=STRONG_PASSWORD, name="User", birthday="2000-12-13")
         task = Task.objects.get(id=1)
         user = User.objects.get(id=1)
         Submission.objects.create(task=task, user=user, status=0, language=0, time="700", memory="993")
