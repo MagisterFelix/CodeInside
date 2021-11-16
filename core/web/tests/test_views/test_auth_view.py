@@ -1,6 +1,6 @@
 from django.test import TestCase
 from rest_framework.exceptions import ErrorDetail
-from rest_framework.test import APIRequestFactory
+from rest_framework.test import APIRequestFactory, force_authenticate
 
 from core.web.models import User, Achievement
 from core.web.tests import STRONG_PASSWORD
@@ -18,6 +18,10 @@ class AuthViewTest(TestCase):
 
     def setUp(self):
         self.factory = APIRequestFactory()
+        self.user = User.objects.get(id=1)
+        User.objects.create_user(
+            email='temp@gmail.com', password=STRONG_PASSWORD, name='Temp', birthday='2000-12-13')
+        self.temp_user = User.objects.get(name='Temp')
 
     def test_registration(self):
         request = self.factory.post(path='signUp', data={'email': 'test@gmail.com',
@@ -90,6 +94,34 @@ class AuthViewTest(TestCase):
         response = UserProfileView.as_view()(request)
         self.assertDictEqual(response.data,
                              {'detail': ErrorDetail(string='Error decoding signature.', code='authentication_failed')})
+
+    def test_profile_with_id(self):
+        request = self.factory.get(path='profile',
+                                   format='json')
+        force_authenticate(request, user=self.user)
+        response = UserProfileView.as_view()(request, self.temp_user.id)
+        self.assertDictEqual(response.data,
+                             {'data': {
+                                 'banned': False,
+                                 'birthday': '12/13/2000',
+                                 'email': 'temp@gmail.com',
+                                 'id': 2,
+                                 'image': 'https://i.imgur.com/V4RclNb.png',
+                                 'name': 'Temp',
+                                 'premium': False,
+                                 'role': 'User',
+                                 'time_zone': 'UTC',
+                             },
+                                 'message': 'User profile received successfully.',
+                                 'status code': 200,
+                                 'success': True})
+
+    def test_profile_with_id_if_user_not_exists(self):
+        request = self.factory.get(path='profile', format='json')
+        force_authenticate(request, user=self.user)
+        response = UserProfileView.as_view()(request, primary_key=100)
+        self.assertDictEqual(response.data,
+                             {'data': None, 'success': False, 'status code': 404, 'message': 'User does not exist.'})
 
     def test_user_update_image(self):
         email = 'default@gmail.com'
