@@ -22,6 +22,7 @@ class IsAdminUserOrIsAuthenticated(IsAdminUser):
 permissions = DotDict({
     'AllowAny': AllowAny,
     'IsAuthenticated': IsAuthenticated,
+    'IsAdminUser': IsAdminUser,
     'IsAdminUserOrReadOnly': IsAdminUserOrReadOnly,
     'IsAdminUserOrIsAuthenticated': IsAdminUserOrIsAuthenticated
 })
