@@ -24,7 +24,7 @@ class CommentView(APIView):
             task = Task.objects.filter(id=primary_key)
             if task.exists():
                 data = Comment.objects.filter(
-                    task=primary_key).values("id", "user__name", "message", "datetime")
+                    task=primary_key).values("id", "user__id", "user__name", "message", "datetime")
 
                 for comment in data:
                     comment['datetime'] = convert_datetime(comment['datetime'], request.user.time_zone)
