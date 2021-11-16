@@ -79,6 +79,20 @@ class ProfileSerializer(serializers.ModelSerializer):
         return user
 
 
+class PermissionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = (
+            'is_active', 'is_staff'
+        )
+
+    def update(self, user, validated_data):
+        user.is_active = validated_data.get('is_active', user.is_active)
+        user.is_staff = validated_data.get('is_staff', user.is_staff)
+        user.save()
+        return user
+
+
 class TopicSerializer(serializers.ModelSerializer):
     class Meta:
         model = Topic
