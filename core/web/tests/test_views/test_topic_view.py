@@ -2,6 +2,7 @@ from django.test import TestCase
 from rest_framework.test import APIRequestFactory, force_authenticate
 
 from core.web.models import User, Topic
+from core.web.tests import STRONG_PASSWORD
 from core.web.views.topic_view import TopicView
 
 
@@ -9,15 +10,14 @@ class TopicViewTest(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        strong_password = '53175bcc0524f37b47062faf5da28e3f8eb91d51'
         admin_mail = 'admin@gmail.com'
         user_mail = 'default@gmail.com'
 
         User.objects.create_superuser(
-            email=admin_mail, password=strong_password)
+            email=admin_mail, password=STRONG_PASSWORD)
 
         User.objects.create_user(
-            email=user_mail, password=strong_password, name='User', birthday='2000-12-13')
+            email=user_mail, password=STRONG_PASSWORD, name='User', birthday='2000-12-13')
 
         Topic.objects.create(name='Static_Topic', desc='Static_Description')
 

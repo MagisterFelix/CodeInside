@@ -1,8 +1,9 @@
 from django.test import TestCase
 from rest_framework.exceptions import ErrorDetail
-from rest_framework.test import APIRequestFactory
+from rest_framework.test import APIRequestFactory, force_authenticate
 
 from core.web.models import User, Achievement
+from core.web.tests import STRONG_PASSWORD
 from core.web.views.auth_view import UserRegistrationView, UserLoginView, UserProfileView
 
 
@@ -10,19 +11,21 @@ class AuthViewTest(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        strong_password = "53175bcc0524f37b47062faf5da28e3f8eb91d51"
         user_mail = "default@gmail.com"
         User.objects.create_user(
-            email=user_mail, password=strong_password, name="User", birthday="2000-12-13")
+            email=user_mail, password=STRONG_PASSWORD, name="User", birthday="2000-12-13")
         Achievement.objects.create(name='ACQUAINTANCE')
 
     def setUp(self):
         self.factory = APIRequestFactory()
-        self.strong_password = "53175bcc0524f37b47062faf5da28e3f8eb91d51"
+        self.user = User.objects.get(id=1)
+        User.objects.create_user(
+            email='temp@gmail.com', password=STRONG_PASSWORD, name='Temp', birthday='2000-12-13')
+        self.temp_user = User.objects.get(name='Temp')
 
     def test_registration(self):
         request = self.factory.post(path='signUp', data={'email': 'test@gmail.com',
-                                                         'password': self.strong_password,
+                                                         'password': STRONG_PASSWORD,
                                                          'name': 'User',
                                                          'birthday': '10/10/2000',
                                                          'time_zone': 'UTC', }, format='json')
@@ -33,7 +36,7 @@ class AuthViewTest(TestCase):
     def test_registration_if_user_already_exists(self):
         request = self.factory.post(path='signUp',
                                     data={'email': 'default@gmail.com',
-                                          'password': self.strong_password,
+                                          'password': STRONG_PASSWORD,
                                           'name': 'User',
                                           'birthday': '10/10/2000',
                                           'time_zone': 'UTC', }, format='json')
@@ -45,7 +48,7 @@ class AuthViewTest(TestCase):
     def test_login(self):
         request = self.factory.post(path='signIn',
                                     data={'email': 'default@gmail.com',
-                                          'password': self.strong_password, }, format='json')
+                                          'password': STRONG_PASSWORD, }, format='json')
 
         response = UserLoginView.as_view()(request)
         self.assertListEqual([response.data['success'], response.data['status code'], response.data['message']],
@@ -55,7 +58,7 @@ class AuthViewTest(TestCase):
     def test_login_if_user_not_exists(self):
         request = self.factory.post(path='signIn',
                                     data={'email': 'idk@gmail.com',
-                                          'password': self.strong_password, }, format='json')
+                                          'password': STRONG_PASSWORD, }, format='json')
         response = UserLoginView.as_view()(request)
         self.assertDictEqual(response.data,
                              {'success': False, 'status code': 404,
@@ -66,7 +69,7 @@ class AuthViewTest(TestCase):
         email = 'default@gmail.com'
         request = self.factory.post(path='signIn',
                                     data={'email': email,
-                                          'password': self.strong_password, }, format='json')
+                                          'password': STRONG_PASSWORD, }, format='json')
 
         response = UserLoginView.as_view()(request)
         token = response.data['token']
@@ -92,11 +95,39 @@ class AuthViewTest(TestCase):
         self.assertDictEqual(response.data,
                              {'detail': ErrorDetail(string='Error decoding signature.', code='authentication_failed')})
 
+    def test_profile_with_id(self):
+        request = self.factory.get(path='profile',
+                                   format='json')
+        force_authenticate(request, user=self.user)
+        response = UserProfileView.as_view()(request, self.temp_user.id)
+        self.assertDictEqual(response.data,
+                             {'data': {
+                                 'banned': False,
+                                 'birthday': '12/13/2000',
+                                 'email': 'temp@gmail.com',
+                                 'id': 2,
+                                 'image': 'https://i.imgur.com/V4RclNb.png',
+                                 'name': 'Temp',
+                                 'premium': False,
+                                 'role': 'User',
+                                 'time_zone': 'UTC',
+                             },
+                                 'message': 'User profile received successfully.',
+                                 'status code': 200,
+                                 'success': True})
+
+    def test_profile_with_id_if_user_not_exists(self):
+        request = self.factory.get(path='profile', format='json')
+        force_authenticate(request, user=self.user)
+        response = UserProfileView.as_view()(request, primary_key=100)
+        self.assertDictEqual(response.data,
+                             {'data': None, 'success': False, 'status code': 404, 'message': 'User does not exist.'})
+
     def test_user_update_image(self):
         email = 'default@gmail.com'
         request = self.factory.post(path='signIn',
                                     data={'email': email,
-                                          'password': self.strong_password, }, format='json')
+                                          'password': STRONG_PASSWORD, }, format='json')
 
         response = UserLoginView.as_view()(request)
         token = response.data['token']
@@ -116,7 +147,7 @@ class AuthViewTest(TestCase):
         email = 'default@gmail.com'
         request = self.factory.post(path='signIn',
                                     data={'email': email,
-                                          'password': self.strong_password, }, format='json')
+                                          'password': STRONG_PASSWORD, }, format='json')
 
         response = UserLoginView.as_view()(request)
         token = response.data['token']
@@ -133,7 +164,7 @@ class AuthViewTest(TestCase):
         email = 'default@gmail.com'
         request = self.factory.post(path='signIn',
                                     data={'email': email,
-                                          'password': self.strong_password, }, format='json')
+                                          'password': STRONG_PASSWORD, }, format='json')
 
         response = UserLoginView.as_view()(request)
         token = response.data['token']
@@ -158,7 +189,7 @@ class AuthViewTest(TestCase):
 
         request = self.factory.post(path='signIn',
                                     data={'email': 'default@gmail.com',
-                                          'password': self.strong_password, }, format='json')
+                                          'password': STRONG_PASSWORD, }, format='json')
 
         response = UserLoginView.as_view()(request)
         self.assertListEqual([response.data['success'], response.data['status code'], response.data['message']],
@@ -169,7 +200,7 @@ class AuthViewTest(TestCase):
         email = 'default@gmail.com'
         request = self.factory.post(path='signIn',
                                     data={'email': email,
-                                          'password': self.strong_password, }, format='json')
+                                          'password': STRONG_PASSWORD, }, format='json')
 
         response = UserLoginView.as_view()(request)
         token = response.data['token']
