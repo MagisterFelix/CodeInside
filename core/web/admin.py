@@ -97,7 +97,7 @@ class TopicAdmin(admin.ModelAdmin):
     ordering = ('name',)
     search_fields = ('name',)
 
-    def get_form(selfT, request, obj=None, **kwargs):
+    def get_form(self, request, obj=None, **kwargs):
         kwargs['widgets'] = {'desc': forms.Textarea(
             attrs={'rows': 10, 'cols': 100})}
         return super().get_form(request, obj, **kwargs)
