@@ -4,6 +4,7 @@ from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import Group
 
 from .models import Achievement, Comment, Submission, Task, Topic, User
+from .models.metrics.payment_metrics import PaymentMetrics
 
 
 class UserCreationForm(forms.ModelForm):
@@ -100,6 +101,23 @@ class TopicAdmin(admin.ModelAdmin):
         kwargs['widgets'] = {'desc': forms.Textarea(
             attrs={'rows': 10, 'cols': 100})}
         return super().get_form(request, obj, **kwargs)
+
+
+@admin.register(PaymentMetrics)
+class PaymentMetricsAdmin(admin.ModelAdmin):
+    change_list_template = 'admin/payment_metrics_change_list.html'
+
+    def changelist_view(self, request, extra_context=None):
+        response = super().changelist_view(
+            request,
+            extra_context=extra_context,
+        )
+        countries = PaymentMetrics.country_stats()
+        payments = PaymentMetrics.payment_stats()
+
+        response.context_data['countries'] = countries
+        response.context_data['payments'] = payments
+        return response
 
 
 admin.site.unregister(Group)
