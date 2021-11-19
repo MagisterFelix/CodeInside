@@ -107,6 +107,7 @@ class SubmissionView(APIView):
                         'Accepted': 'ACCEPTED',
                         'Wrong answer': 'WRONG ANSWER',
                         'Time limit exceeded': 'TIME LIMITED',
+                        'Memory limit exceeded': 'MEMORY LIMITED',
                     }.get(data['status'])
                     if status_achievement and not user.achievement.filter(name=status_achievement).exists():
                         user.achievement.add(submission_achievements.get(name=status_achievement))

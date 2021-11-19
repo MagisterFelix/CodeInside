@@ -28,7 +28,7 @@ class SubmissionViewTest(TestCase):
         for achieve_name in ['ACQUAINTANCE', 'COMMENTATOR', 'TRAINEE', 'JUNIOR', 'MIDDLE', 'SENIOR', 'TECHNICAL EXPERT',
                              'YONGLING', 'PADAVAN', 'KNIGHT', 'MASTER', 'ELITE',
                              'PYTHON DEV', 'C++ DEV', 'C# DEV', 'JAVA DEV', 'JAVASCRIPT DEV',
-                             'ACCEPTED', 'WRONG ANSWER', 'TIME LIMITED']:
+                             'ACCEPTED', 'WRONG ANSWER', 'TIME LIMITED', 'MEMORY LIMITED']:
             Achievement.objects.create(name=achieve_name)
 
     def setUp(self):
