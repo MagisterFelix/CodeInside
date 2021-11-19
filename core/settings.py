@@ -85,6 +85,18 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+EMAIL_BACKEND = f'django.core.mail.backends.{"console" if DEBUG else "smtp"}.EmailBackend'
+
+EMAIL_HOST = 'smtp.gmail.com'
+
+EMAIL_HOST_USER = 'codeinside.platform@gmail.com'
+
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_PASSWORD')
+
+EMAIL_USE_TLS = True
+
+EMAIL_PORT = 587
+
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',

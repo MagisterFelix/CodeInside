@@ -1,4 +1,6 @@
 from django.conf.urls import url
+from django.views.generic import RedirectView
+from django.contrib.auth import views as auth_views
 
 from .views.achievement_view import AchievementView
 from .views.auth_view import UserRegistrationView, UserLoginView, UserProfileView
@@ -28,4 +30,10 @@ urlpatterns = [
     url(r'^achievements/?$', AchievementView.as_view()),
     url(r'^payment/(?P<primary_key>\d+)/?$', PaymentView.as_view()),
     url(r'^postpayment/(?P<email>[\w.@-]+)/(?P<session_id>[\w.-]+)/?$', PostPaymentView.as_view()),
+    url(r'^password/reset/$', auth_views.PasswordResetView.as_view(), name='password_reset'),
+    url(r'^password/reset/done/$', auth_views.PasswordResetDoneView.as_view(), name='password_reset_done'),
+    url(r'^password/reset/(?P<uidb64>[0-9A-Za-z]+)-(?P<token>.+)/$',
+        auth_views.PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
+    url(r'^password/reset/complete/$', RedirectView.as_view(url='http://codeinside-web.herokuapp.com/login'),
+        name='password_reset_complete'),
 ]
