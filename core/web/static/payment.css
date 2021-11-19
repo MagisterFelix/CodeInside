@@ -1,0 +1,58 @@
+.countries-list {
+    column-gap: clamp(1.6rem, 4vw, 3.2rem);
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+    min-height: 10rem;
+    row-gap: 3.2rem;
+    margin: 4% 10% 0 10%;
+}
+
+.country-badge {
+    box-sizing: border-box;
+    text-align: center;
+}
+
+.country-item {
+    font-size: 1.4rem;
+    position: relative;
+    width: 75%;
+    height: 75%;
+}
+
+.country-name {
+    display: block;
+    line-height: 1.2;
+    margin-top: 1rem;
+}
+
+.awards-item-img {
+    display: block;
+    width: 100%;
+}
+
+.awards-item-img-hidden {
+    display: block;
+    filter: grayscale(100%);
+    width: 100%;
+}
+
+.balance {
+    font-size: 30px;
+    font-weight: bold;
+}
+
+.image-block {
+    position: relative;
+}
+
+.image-visitors {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    position: absolute;
+    font-size: 5vw;
+    pointer-events: none;
+    font-weight: bold;
+    mix-blend-mode: darken;
+    filter: drop-shadow(0.05em 0.05em orange);
+}

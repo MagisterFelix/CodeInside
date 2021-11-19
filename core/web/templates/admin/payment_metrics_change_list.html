@@ -1,0 +1,49 @@
+{% extends "admin/change_list.html" %}
+{% load static %}
+{% block extrastyle %}
+<link rel="stylesheet" href="{% static 'payment.css' %}" type="text/css">
+{% endblock %}
+{% block object-tools-items %}
+{% endblock %}
+{% block content_title %}
+<h1> Payments Statistics </h1>
+{% endblock %}
+
+{% block result_list %}
+
+<div class="balance">
+    Balance: {{ payments.balance }} $
+</div>
+<br>
+<p>Max payment: {{ payments.max_payment }} $</p>
+<p>Min payment: {{ payments.min_payment }} $</p>
+<p>Average payment: {{ payments.avg_payment }} $</p>
+<p>Average risk: {{ payments.avg_risk }}</p>
+<div class="balance">
+    Country stats:
+</div>
+<div class="countries-list">
+    {% for symbol, data in countries %}
+    <div class="country-badge">
+        <div class="country-item">
+            <div class="image-block">
+                {% if data.1 > 0 %}
+                <img class="awards-item-img"
+                     src="https://betacssjs.chesscomfiles.com/bundles/web/images/stamps/{{ symbol }}.png"
+                     alt="{{ symbol }}" title="{{ data.1 }} people from {{ data.0 }} bought premium">
+                <span class="image-visitors">{{ data.1 }}</span>
+                {% else %}
+                <img class="awards-item-img-hidden"
+                     src="https://betacssjs.chesscomfiles.com/bundles/web/images/stamps/{{ symbol }}.png"
+                     alt="{{ symbol }}" title="Nobody from {{ data.0 }} bought premium">
+                {% endif %}
+            </div>
+            <span class=country-name>{{ data.0 }}</span>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+
+{% endblock %}
+{% block pagination %}{% endblock %}
