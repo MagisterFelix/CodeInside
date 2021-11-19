@@ -8,12 +8,15 @@ from .views.payment_view import PaymentView, PostPaymentView
 from .views.submission_view import SubmissionView
 from .views.task_view import TaskView
 from .views.topic_view import TopicView
+from .views.permission_view import PermissionView
 
 urlpatterns = [
     url(r'^$', BaseView.as_view()),
     url(r'^signUp/?$', UserRegistrationView.as_view()),
     url(r'^signIn/?$', UserLoginView.as_view()),
     url(r'^profile/?$', UserProfileView.as_view()),
+    url(r'^profile/(?P<primary_key>\d+)/?$', UserProfileView.as_view()),
+    url(r'^permissions/(?P<primary_key>\d+)/?$', PermissionView().as_view()),
     url(r'^topics/?$', TopicView.as_view()),
     url(r'^topics/(?P<primary_key>\d+)/?$', TopicView.as_view()),
     url(r'^tasks/?$', TaskView.as_view()),

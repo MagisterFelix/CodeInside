@@ -108,8 +108,24 @@ class UserProfileView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
     authentication_class = JSONWebTokenAuthentication
 
-    def get(self, request):
-        user = User.objects.get(email=request.user)
+    def get(self, request, primary_key=None):
+        if primary_key:
+            user = User.objects.filter(id=primary_key)
+            if user.exists():
+                user = user.first()
+            else:
+                status_code = status.HTTP_404_NOT_FOUND
+                response = {
+                    'success': False,
+                    'status code': status_code,
+                    'message': 'User does not exist.',
+                    'data': None
+                }
+
+                return Response(response, status=status_code)
+        else:
+            user = User.objects.get(email=request.user)
+
         role = 'Admin' if user.is_superuser else 'Moderator' if user.is_staff else 'User'
         premium = bool(user.premium)
         banned = not user.is_active

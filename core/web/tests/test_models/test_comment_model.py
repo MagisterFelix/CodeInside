@@ -3,6 +3,7 @@ import datetime
 from django.test import TestCase
 
 from core.web.models import Comment, Task, Topic, User
+from core.web.tests import STRONG_PASSWORD
 
 
 class CommentModelTest(TestCase):
@@ -13,7 +14,7 @@ class CommentModelTest(TestCase):
         topic = Topic.objects.get(id=1)
         Task.objects.create(name="T1", desc="D1", complexity=0, topic=topic, input="in", output="out", solution="sol")
         task = Task.objects.get(id=1)
-        User.objects.create_user(email="user@gmail.com", password="Am23Jn2lA", name="User", birthday="2000-12-13")
+        User.objects.create_user(email="user@gmail.com", password=STRONG_PASSWORD, name="User", birthday="2000-12-13")
         user = User.objects.get(id=1)
         Comment.objects.create(user=user, task=task, message="M1")
 
